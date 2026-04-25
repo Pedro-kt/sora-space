@@ -1,8 +1,19 @@
 # SoraSpace
 
-App de exploración del universo construida con **Kotlin Multiplatform (KMP)** y **Compose Multiplatform (CMP)**, consumiendo la [NASA Open API](https://api.nasa.gov/).
+App de exploración espacial construida con **Kotlin Multiplatform (KMP)** y **Compose Multiplatform (CMP)**, consumiendo las APIs públicas de la NASA.
 
 **Plataformas:** Android · iOS
+
+---
+
+## Módulos
+
+| Módulo | Descripción | API |
+|--------|-------------|-----|
+| **APOD** | Astronomy Picture of the Day — imagen del día + feed histórico | `api.nasa.gov/planetary/apod` |
+| **Media Explorer** | Búsqueda de imágenes y videos del archivo multimedia de NASA | `images-api.nasa.gov/search` |
+| **Space Search** | Próximamente | — |
+| **Favorites** | Colección guardada localmente | — |
 
 ---
 
@@ -12,36 +23,46 @@ El proyecto sigue **Clean Architecture** con **MVVM** en la capa de presentació
 
 ```
 composeApp/src/
-├── commonMain/                    ← compila para Android e iOS
+├── commonMain/                          ← compila para Android e iOS
 │   ├── domain/
-│   │   ├── model/                 ← modelos de negocio puros
-│   │   └── repository/            ← interfaces (contratos)
+│   │   ├── model/                       ← modelos de negocio puros
+│   │   │   ├── Apod.kt
+│   │   │   ├── NasaMedia.kt
+│   │   │   └── MarsPhoto.kt
+│   │   └── repository/                  ← interfaces (contratos)
+│   │       ├── ApodRepository.kt
+│   │       └── MediaRepository.kt
 │   ├── data/
 │   │   ├── remote/
-│   │   │   ├── dto/               ← DTOs con @Serializable
-│   │   │   ├── KtorClient.kt      ← expect + configuración HTTP compartida
-│   │   │   └── NasaApiService.kt  ← llamadas a la API
-│   │   └── repository/            ← implementaciones de los contratos
+│   │   │   ├── dto/                     ← DTOs con @Serializable
+│   │   │   ├── KtorClient.kt            ← expect + configuración HTTP compartida
+│   │   │   └── NasaApiService.kt        ← llamadas a la API
+│   │   └── repository/                  ← implementaciones de los contratos
 │   └── presentation/
-│       └── home/
-│           ├── HomeUiState.kt     ← estado de UI (sealed class)
-│           ├── HomeViewModel.kt   ← lógica de presentación
-│           └── HomeScreen.kt      ← UI en Compose (100% compartida)
+│       ├── home/
+│       ├── apod/
+│       ├── mars/                        ← Media Explorer
+│       ├── search/
+│       ├── favorites/
+│       └── navigation/
+│           └── SoraNavGraph.kt
 │
-├── androidMain/                   ← solo Android
-│   └── data/remote/
-│       └── KtorClient.android.kt  ← actual: OkHttp engine
+├── androidMain/                         ← solo Android
+│   ├── data/remote/
+│   │   └── KtorClient.android.kt        ← actual: OkHttp engine
+│   └── res/values/
+│       └── themes.xml                   ← tema oscuro para evitar flash blanco
 │
-└── iosMain/                       ← solo iOS
+└── iosMain/                             ← solo iOS
     └── data/remote/
-        └── KtorClient.ios.kt      ← actual: Darwin engine
+        └── KtorClient.ios.kt            ← actual: Darwin engine
 ```
 
 ### Capas
 
-**Domain** — lógica de negocio sin dependencias de plataforma ni de frameworks externos. Define los modelos (`Apod`) y los contratos (`ApodRepository`) que el resto de las capas respetan.
+**Domain** — lógica de negocio sin dependencias de plataforma ni de frameworks externos. Define los modelos y los contratos que el resto de las capas respetan.
 
-**Data** — implementa los contratos del dominio. Contiene el cliente HTTP (Ktor), los DTOs serializables y el mapeo hacia los modelos de dominio.
+**Data** — implementa los contratos del dominio. Contiene el cliente HTTP (Ktor), los DTOs serializables y el mapeo hacia los modelos de dominio. El manejo de errores valida la respuesta antes de deserializar para cubrir casos como rate-limit de NASA.
 
 **Presentation** — ViewModel con coroutines y `StateFlow`, y UI construida íntegramente con Compose. Ambos viven en `commonMain` y se compilan sin cambios para Android e iOS.
 
@@ -49,19 +70,12 @@ composeApp/src/
 
 ## El patrón `expect/actual`
 
-KMP usa `expect/actual` para aislar el código que necesariamente difiere entre plataformas. En este proyecto la única diferencia real es el engine HTTP:
+KMP usa `expect/actual` para aislar el código que difiere entre plataformas. En este proyecto la única diferencia real es el engine HTTP:
 
 ```kotlin
 // commonMain — declara la "promesa"
 expect fun createHttpClientEngine(): HttpClientEngine
 
-// La configuración del cliente es compartida
-fun createHttpClient() = HttpClient(createHttpClientEngine()) {
-    install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
-}
-```
-
-```kotlin
 // androidMain — cumple la promesa con OkHttp
 actual fun createHttpClientEngine(): HttpClientEngine = OkHttp.create()
 
@@ -69,7 +83,7 @@ actual fun createHttpClientEngine(): HttpClientEngine = OkHttp.create()
 actual fun createHttpClientEngine(): HttpClientEngine = Darwin.create()
 ```
 
-El compilador garantiza en tiempo de build que toda función marcada como `expect` tenga su contraparte `actual` en cada plataforma objetivo.
+El compilador garantiza en tiempo de build que toda función `expect` tenga su contraparte `actual` en cada plataforma objetivo.
 
 ---
 
@@ -81,24 +95,35 @@ El compilador garantiza en tiempo de build que toda función marcada como `expec
 | Compose Multiplatform 1.10.3 | UI compartida entre Android e iOS |
 | Ktor 3.1.3 | Cliente HTTP multiplataforma |
 | kotlinx.serialization 1.7.3 | Deserialización de JSON |
+| kotlinx.datetime 0.6.2 | Manejo de fechas multiplataforma |
 | Coil 3.1.0 | Carga de imágenes asíncrona |
+| AndroidX Navigation 2.9.0 | Navegación con rutas tipadas |
 | AndroidX Lifecycle 2.10.0 | ViewModel y coroutines scope |
+
+---
+
+## APIs utilizadas
+
+| API | Base URL | Auth |
+|-----|----------|------|
+| NASA Open API | `https://api.nasa.gov` | API Key |
+| NASA Image & Video Library | `https://images-api.nasa.gov` | Sin key |
 
 ---
 
 ## Flujo de datos
 
 ```
-UI (HomeScreen)
-  └─ observa StateFlow
-       └─ HomeViewModel
-            └─ ApodRepository (interfaz)
-                 └─ ApodRepositoryImpl
+UI (Screen)
+  └─ observa StateFlow<UiState>
+       └─ ViewModel
+            └─ Repository (interfaz)
+                 └─ RepositoryImpl
                       └─ NasaApiService
-                           └─ Ktor → GET api.nasa.gov/planetary/apod
+                           └─ Ktor → NASA API
 ```
 
-El ViewModel expone un único `StateFlow<HomeUiState>` con tres estados posibles: `Loading`, `Success(apod)` y `Error(message)`. La UI reacciona al estado sin lógica propia.
+Cada pantalla maneja tres estados: `Loading`, `Success(data)` y `Error(message)`. La UI reacciona al estado sin lógica propia.
 
 ---
 
@@ -111,4 +136,20 @@ El ViewModel expone un único `StateFlow<HomeUiState>` con tres estados posibles
 
 **iOS** — abrir `/iosApp` en Xcode y correr desde ahí, o usar la configuración de run del IDE.
 
-**API key** — el proyecto usa `DEMO_KEY` de NASA (30 req/hora por IP). Para desarrollo sostenido, registrar una key gratuita en [api.nasa.gov](https://api.nasa.gov) y reemplazarla en `NasaApiService.kt`.
+---
+
+## API Key
+
+El proyecto usa `DEMO_KEY` de NASA como fallback (30 req/hora). Para desarrollo sostenido, registrar una key gratuita en [api.nasa.gov](https://api.nasa.gov) y agregarla en `local.properties`:
+
+```
+NASA_API_KEY=tu_key_aqui
+```
+
+El `build.gradle.kts` la inyecta automáticamente en `BuildConfig`. El archivo `local.properties` está en `.gitignore` — la key nunca se sube al repositorio.
+
+---
+
+## Autor
+
+Desarrollado por Pedro Bustamante
