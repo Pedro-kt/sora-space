@@ -1,4 +1,4 @@
-# SoraSpace
+# Sora Space
 
 App de exploración espacial construida con **Kotlin Multiplatform (KMP)** y **Compose Multiplatform (CMP)**, consumiendo las APIs públicas de la NASA.
 
@@ -41,7 +41,7 @@ composeApp/src/
 │   └── presentation/
 │       ├── home/
 │       ├── apod/
-│       ├── mars/                        ← Media Explorer
+│       ├── media_explorer/                        ← Media Explorer
 │       ├── search/
 │       ├── favorites/
 │       └── navigation/
