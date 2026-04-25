@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -162,6 +163,7 @@ private fun HeroSection(
                 onClick  = onBack,
                 modifier = Modifier
                     .align(Alignment.TopStart)
+                    .statusBarsPadding()
                     .padding(12.dp)
                     .size(36.dp),
                 colors = IconButtonDefaults.filledIconButtonColors(
@@ -182,6 +184,7 @@ private fun HeroSection(
                 onClick     = onToggleFavorite,
                 modifier    = Modifier
                     .align(Alignment.TopEnd)
+                    .statusBarsPadding()
                     .padding(12.dp)
             )
         }

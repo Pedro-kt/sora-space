@@ -1,7 +1,9 @@
 package com.yumedev.soraspace.data.remote
 
 import com.yumedev.soraspace.data.remote.dto.ApodDto
+import com.yumedev.soraspace.data.remote.dto.AsteroidFeedDto
 import com.yumedev.soraspace.data.remote.dto.MarsPhotosResponse
+import com.yumedev.soraspace.data.remote.dto.NasaAssetResponse
 import com.yumedev.soraspace.data.remote.dto.NasaMediaCollectionResponse
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -34,6 +36,16 @@ class NasaApiService {
             parameter("earth_date", earthDate)
         })
 
+    suspend fun getAsteroidFeed(startDate: String, endDate: String): AsteroidFeedDto =
+        json.decodeFromString(fetch("$BASE_URL/neo/rest/v1/feed") {
+            parameter("api_key", API_KEY)
+            parameter("start_date", startDate)
+            parameter("end_date", endDate)
+        })
+
+    suspend fun getMediaAsset(nasaId: String): NasaAssetResponse =
+        json.decodeFromString(fetch("$MEDIA_BASE_URL/asset/$nasaId"))
+
     suspend fun searchMedia(query: String): NasaMediaCollectionResponse =
         json.decodeFromString(fetch("$MEDIA_BASE_URL/search") {
             parameter("q", query)
@@ -47,10 +59,11 @@ class NasaApiService {
         val response = client.get(url, block)
         val raw = response.bodyAsText()
 
-        val errorMessage = runCatching { json.parseToJsonElement(raw) }
-            .getOrNull()
-            ?.jsonObject?.get("error")
-            ?.jsonObject?.get("message")?.jsonPrimitive?.content
+        val errorMessage = runCatching {
+            json.parseToJsonElement(raw)
+                .jsonObject["error"]
+                ?.jsonObject?.get("message")?.jsonPrimitive?.content
+        }.getOrNull()
 
         if (errorMessage != null) throw NasaApiException(errorMessage)
         if (!response.status.isSuccess()) {

@@ -4,4 +4,5 @@ import com.yumedev.soraspace.domain.model.NasaMedia
 
 interface MediaRepository {
     suspend fun search(query: String): List<NasaMedia>
+    suspend fun getAssetUrl(nasaId: String, isVideo: Boolean): String?
 }

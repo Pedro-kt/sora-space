@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +42,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,7 +61,8 @@ import com.yumedev.soraspace.ui.theme.SoraType
 @Composable
 fun MarsScreen(
     viewModel: MediaExplorerViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNavigateToDetail: (NasaMedia) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val query by viewModel.query.collectAsState()
@@ -131,7 +135,7 @@ fun MarsScreen(
             is MediaExplorerUiState.Idle    -> IdleContent()
             is MediaExplorerUiState.Loading -> LoadingContent()
             is MediaExplorerUiState.Error   -> ErrorContent(state.message) { viewModel.search() }
-            is MediaExplorerUiState.Success -> MediaGrid(state.items)
+            is MediaExplorerUiState.Success -> MediaGrid(state.items, onNavigateToDetail)
         }
     }
 }
@@ -139,7 +143,7 @@ fun MarsScreen(
 // ─── Componentes ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun MediaGrid(items: List<NasaMedia>) {
+private fun MediaGrid(items: List<NasaMedia>, onItemClick: (NasaMedia) -> Unit) {
     LazyVerticalGrid(
         columns               = GridCells.Fixed(2),
         contentPadding        = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
@@ -148,17 +152,22 @@ private fun MediaGrid(items: List<NasaMedia>) {
         modifier              = Modifier.fillMaxSize()
     ) {
         items(items, key = { it.id }) { media ->
-            MediaCard(media)
+            MediaCard(media, onClick = { onItemClick(media) })
         }
     }
 }
 
 @Composable
-private fun MediaCard(media: NasaMedia) {
+private fun MediaCard(media: NasaMedia, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .aspectRatio(1f)
             .clip(RoundedCornerShape(8.dp))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication        = null,
+                onClick           = onClick
+            )
     ) {
         AsyncImage(
             model              = media.thumbnailUrl,

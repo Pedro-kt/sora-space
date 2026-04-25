@@ -11,8 +11,8 @@ App de exploración espacial construida con **Kotlin Multiplatform (KMP)** y **C
 | Módulo | Descripción | API |
 |--------|-------------|-----|
 | **APOD** | Astronomy Picture of the Day — imagen del día + feed histórico | `api.nasa.gov/planetary/apod` |
-| **Media Explorer** | Búsqueda de imágenes y videos del archivo multimedia de NASA | `images-api.nasa.gov/search` |
-| **Space Search** | Próximamente | — |
+| **Media Explorer** | Búsqueda de imágenes y videos del archivo multimedia de NASA + detalle en alta resolución | `images-api.nasa.gov/search`, `images-api.nasa.gov/asset/{id}` |
+| **Space Search** | Feed semanal de asteroides cercanos a la Tierra (NEOs) con datos de distancia, diámetro, velocidad y riesgo | `api.nasa.gov/neo/rest/v1/feed` |
 | **Favorites** | Colección guardada localmente | — |
 
 ---
@@ -28,10 +28,11 @@ composeApp/src/
 │   │   ├── model/                       ← modelos de negocio puros
 │   │   │   ├── Apod.kt
 │   │   │   ├── NasaMedia.kt
-│   │   │   └── MarsPhoto.kt
+│   │   │   └── Asteroid.kt
 │   │   └── repository/                  ← interfaces (contratos)
 │   │       ├── ApodRepository.kt
-│   │       └── MediaRepository.kt
+│   │       ├── MediaRepository.kt
+│   │       └── AsteroidRepository.kt
 │   ├── data/
 │   │   ├── remote/
 │   │   │   ├── dto/                     ← DTOs con @Serializable
@@ -41,8 +42,8 @@ composeApp/src/
 │   └── presentation/
 │       ├── home/
 │       ├── apod/
-│       ├── media_explorer/                        ← Media Explorer
-│       ├── search/
+│       ├── media_explorer/              ← Media Explorer + detalle
+│       ├── search/                      ← Space Search (Asteroids NeoWs)
 │       ├── favorites/
 │       └── navigation/
 │           └── SoraNavGraph.kt
@@ -104,10 +105,11 @@ El compilador garantiza en tiempo de build que toda función `expect` tenga su c
 
 ## APIs utilizadas
 
-| API | Base URL | Auth |
-|-----|----------|------|
-| NASA Open API | `https://api.nasa.gov` | API Key |
-| NASA Image & Video Library | `https://images-api.nasa.gov` | Sin key |
+| API | Endpoints | Auth |
+|-----|-----------|------|
+| NASA Open API — APOD | `/planetary/apod` | API Key |
+| NASA Open API — NeoWs | `/neo/rest/v1/feed` | API Key |
+| NASA Image & Video Library | `/search`, `/asset/{id}` | Sin key |
 
 ---
 

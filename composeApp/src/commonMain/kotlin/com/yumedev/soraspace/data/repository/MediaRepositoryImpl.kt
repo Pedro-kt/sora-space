@@ -12,6 +12,20 @@ class MediaRepositoryImpl(
     override suspend fun search(query: String): List<NasaMedia> =
         apiService.searchMedia(query).collection.items.mapNotNull { it.toDomain() }
 
+    override suspend fun getAssetUrl(nasaId: String, isVideo: Boolean): String? {
+        val items = apiService.getMediaAsset(nasaId).collection.items.map { it.href }
+        return if (isVideo) {
+            items.firstOrNull { it.endsWith("~orig.mp4") }
+                ?: items.firstOrNull { it.endsWith("~mobile.mp4") }
+                ?: items.firstOrNull { it.endsWith(".mp4") }
+        } else {
+            items.firstOrNull { it.endsWith("~orig.jpg") }
+                ?: items.firstOrNull { it.endsWith("~large.jpg") }
+                ?: items.firstOrNull { it.endsWith("~medium.jpg") }
+                ?: items.firstOrNull { it.endsWith(".jpg") }
+        }
+    }
+
     private fun NasaMediaItem.toDomain(): NasaMedia? {
         val data = data.firstOrNull() ?: return null
         val thumbnail = links?.firstOrNull { it.rel == "preview" }?.href
