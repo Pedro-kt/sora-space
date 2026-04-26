@@ -30,6 +30,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.yumedev.soraspace.data.repository.AsteroidRepositoryImpl
+import com.yumedev.soraspace.data.repository.EonetRepositoryImpl
 import com.yumedev.soraspace.data.repository.MediaRepositoryImpl
 import com.yumedev.soraspace.domain.model.NasaMedia
 import com.yumedev.soraspace.presentation.favorites.FavoritesScreen
@@ -44,15 +45,16 @@ import com.yumedev.soraspace.presentation.navigation.SettingsRoute
 import com.yumedev.soraspace.presentation.search.SearchViewModel
 import com.yumedev.soraspace.presentation.search.SearchScreen
 import com.yumedev.soraspace.presentation.settings.SettingsScreen
+import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.theme.SoraColors
 import com.yumedev.soraspace.ui.theme.SoraType
 
-private enum class Tab(val label: String, val icon: ImageVector) {
-    Home("Home",      Icons.Filled.Home),
-    Explore("Explore", Icons.Filled.Explore),
-    Search("Search",   Icons.Filled.Search),
-    Favorites("Saved", Icons.Filled.Favorite),
-    Settings("Settings", Icons.Filled.Settings)
+private enum class Tab(val icon: ImageVector) {
+    Home(Icons.Filled.Home),
+    Explore(Icons.Filled.Explore),
+    Search(Icons.Filled.Search),
+    Favorites(Icons.Filled.Favorite),
+    Settings(Icons.Filled.Settings)
 }
 
 @Composable
@@ -72,6 +74,8 @@ fun MainScreen(
         else                                             -> Tab.Home
     }
 
+    val s = LocalStrings.current
+
     Scaffold(
         containerColor = SoraColors.Background,
         bottomBar = {
@@ -80,6 +84,13 @@ fun MainScreen(
                 tonalElevation = 0.dp
             ) {
                 Tab.entries.forEach { tab ->
+                    val tabLabel = when (tab) {
+                        Tab.Home      -> s.navHome
+                        Tab.Explore   -> s.navExplore
+                        Tab.Search    -> s.navSearch
+                        Tab.Favorites -> s.navSaved
+                        Tab.Settings  -> s.navSettings
+                    }
                     NavigationBarItem(
                         selected = selectedTab == tab,
                         onClick  = {
@@ -99,11 +110,11 @@ fun MainScreen(
                         icon = {
                             Icon(
                                 imageVector        = tab.icon,
-                                contentDescription = tab.label,
+                                contentDescription = tabLabel,
                                 modifier           = Modifier.size(22.dp)
                             )
                         },
-                        label  = { Text(text = tab.label, style = SoraType.Caption) },
+                        label  = { Text(text = tabLabel, style = SoraType.Caption) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor   = SoraColors.Accent,
                             selectedTextColor   = SoraColors.Accent,
@@ -160,7 +171,7 @@ fun MainScreen(
             }
 
             composable<SearchRoute> {
-                val vm = viewModel { SearchViewModel(AsteroidRepositoryImpl()) }
+                val vm = viewModel { SearchViewModel(AsteroidRepositoryImpl(), EonetRepositoryImpl()) }
                 SearchScreen(viewModel = vm, onBack = { innerNav.popBackStack() })
             }
 

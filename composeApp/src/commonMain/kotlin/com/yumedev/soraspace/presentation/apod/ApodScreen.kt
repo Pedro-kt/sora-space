@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.yumedev.soraspace.domain.model.Apod
+import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.theme.SoraColors
 import com.yumedev.soraspace.ui.theme.SoraType
 
@@ -189,13 +190,14 @@ private fun HeroSection(
             )
         }
 
+        val s = LocalStrings.current
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 8.dp)
         ) {
-            Text(text = "ASTRONOMY PICTURE OF THE DAY", style = SoraType.Label)
+            Text(text = s.apodSectionLabel, style = SoraType.Label)
             Spacer(Modifier.height(10.dp))
             Text(text = apod.title, style = SoraType.Title)
             Spacer(Modifier.height(10.dp))
@@ -216,6 +218,7 @@ private fun HeroSection(
 
 @Composable
 private fun FeedSectionHeader(count: Int) {
+    val s = LocalStrings.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,7 +227,7 @@ private fun FeedSectionHeader(count: Int) {
         verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(text = "RECENT DAYS", style = SoraType.Label)
+        Text(text = s.apodRecentDays, style = SoraType.Label)
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -325,6 +328,7 @@ private fun LoadingContent() {
 
 @Composable
 private fun ErrorContent(message: String, onRetry: () -> Unit) {
+    val s = LocalStrings.current
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -337,7 +341,7 @@ private fun ErrorContent(message: String, onRetry: () -> Unit) {
                 tint               = SoraColors.Accent,
                 modifier           = Modifier.size(32.dp)
             )
-            Text(text = "Signal lost", style = SoraType.Title)
+            Text(text = s.apodErrorTitle, style = SoraType.Title)
             Text(
                 text  = message,
                 style = SoraType.Body.copy(textAlign = TextAlign.Center)
@@ -353,7 +357,7 @@ private fun ErrorContent(message: String, onRetry: () -> Unit) {
                     1.dp, SoraColors.Accent.copy(alpha = 0.5f)
                 )
             ) {
-                Text("RETRY", style = SoraType.Label)
+                Text(s.retry.uppercase(), style = SoraType.Label)
             }
         }
     }

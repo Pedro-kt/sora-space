@@ -47,6 +47,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.theme.SoraColors
 import com.yumedev.soraspace.ui.theme.SoraType
 import kotlinx.datetime.Clock
@@ -66,7 +67,8 @@ fun HomeScreen(
     onNavigateToSearch: () -> Unit,
     onNavigateToFavorites: () -> Unit
 ) {
-    val today = remember { formattedToday() }
+    val s     = LocalStrings.current
+    val today = remember(s) { formattedToday(s.monthNames) }
 
     Column(
         modifier = Modifier
@@ -83,15 +85,15 @@ fun HomeScreen(
             Spacer(Modifier.height(8.dp))
             Text(text = today, style = SoraType.Title)
             Spacer(Modifier.height(4.dp))
-            Text(text = "Explore the universe", style = SoraType.Body)
+            Text(text = s.homeTagline, style = SoraType.Body)
         }
 
         Spacer(Modifier.height(12.dp))
 
         NavigationTile(
             icon            = Icons.Filled.AutoAwesome,
-            label           = "ASTRONOMY PICTURE\nOF THE DAY",
-            subtitle        = "Daily cosmos imagery",
+            label           = s.apodLabel,
+            subtitle        = s.apodSubtitle,
             backgroundImage = Res.drawable.apod,
             modifier        = Modifier.height(190.dp),
             onClick         = onNavigateToApod
@@ -103,16 +105,16 @@ fun HomeScreen(
         ) {
             NavigationTile(
                 icon            = Icons.Filled.Explore,
-                label           = "MEDIA\nEXPLORER",
-                subtitle        = "NASA image & video library",
+                label           = s.mediaExplorerLabel,
+                subtitle        = s.mediaExplorerSubtitle,
                 backgroundImage = Res.drawable.mars,
                 modifier        = Modifier.weight(1f).height(155.dp),
                 onClick         = onNavigateToMars
             )
             NavigationTile(
                 icon            = Icons.Filled.Search,
-                label           = "SPACE\nSEARCH",
-                subtitle        = "NASA library",
+                label           = s.spaceSearchLabel,
+                subtitle        = s.spaceSearchSubtitle,
                 backgroundImage = Res.drawable.space_search,
                 modifier        = Modifier.weight(1f).height(155.dp),
                 onClick         = onNavigateToSearch
@@ -121,8 +123,8 @@ fun HomeScreen(
 
         NavigationTile(
             icon     = Icons.Filled.Favorite,
-            label    = "FAVORITES",
-            subtitle = "Your saved collection",
+            label    = s.favoritesLabel,
+            subtitle = s.favoritesSubtitle,
             gradient = Brush.linearGradient(
                 colorStops = arrayOf(
                     0.0f to Color(0xFF3D0066),
@@ -231,13 +233,8 @@ private fun NavigationTile(
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-private fun formattedToday(): String {
-    val date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val month = when (date.monthNumber) {
-        1 -> "January";  2 -> "February"; 3 -> "March"
-        4 -> "April";    5 -> "May";      6 -> "June"
-        7 -> "July";     8 -> "August";   9 -> "September"
-        10 -> "October"; 11 -> "November"; else -> "December"
-    }
+private fun formattedToday(monthNames: List<String>): String {
+    val date  = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val month = monthNames.getOrElse(date.monthNumber - 1) { "" }
     return "$month ${date.dayOfMonth}, ${date.year}"
 }

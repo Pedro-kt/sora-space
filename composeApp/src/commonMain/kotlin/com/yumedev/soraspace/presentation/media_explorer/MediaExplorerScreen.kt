@@ -55,6 +55,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.yumedev.soraspace.domain.model.NasaMedia
+import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.theme.SoraColors
 import com.yumedev.soraspace.ui.theme.SoraType
 
@@ -65,8 +66,9 @@ fun MarsScreen(
     onNavigateToDetail: (NasaMedia) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val query by viewModel.query.collectAsState()
+    val query   by viewModel.query.collectAsState()
     val keyboard = LocalSoftwareKeyboardController.current
+    val s        = LocalStrings.current
 
     Column(
         modifier = Modifier
@@ -96,14 +98,14 @@ fun MarsScreen(
                     modifier           = Modifier.size(18.dp)
                 )
             }
-            Text(text = "MEDIA EXPLORER", style = SoraType.Label)
+            Text(text = s.screenMediaExplorer, style = SoraType.Label)
         }
 
         // Search bar
         TextField(
             value         = query,
             onValueChange = viewModel::onQueryChange,
-            placeholder   = { Text("Search images & videos...", style = SoraType.Body) },
+            placeholder   = { Text(s.explorerSearchPlaceholder, style = SoraType.Body) },
             singleLine    = true,
             leadingIcon   = {
                 Icon(Icons.Filled.Search, contentDescription = null, tint = SoraColors.Accent)
@@ -132,9 +134,9 @@ fun MarsScreen(
         Spacer(Modifier.height(16.dp))
 
         when (val state = uiState) {
-            is MediaExplorerUiState.Idle    -> IdleContent()
+            is MediaExplorerUiState.Idle    -> IdleContent(s.explorerIdleHint)
             is MediaExplorerUiState.Loading -> LoadingContent()
-            is MediaExplorerUiState.Error   -> ErrorContent(state.message) { viewModel.search() }
+            is MediaExplorerUiState.Error   -> ErrorContent(state.message, s.retry) { viewModel.search() }
             is MediaExplorerUiState.Success -> MediaGrid(state.items, onNavigateToDetail)
         }
     }
@@ -215,7 +217,7 @@ private fun MediaCard(media: NasaMedia, onClick: () -> Unit) {
 }
 
 @Composable
-private fun IdleContent() {
+private fun IdleContent(hint: String) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
@@ -225,7 +227,7 @@ private fun IdleContent() {
                 modifier           = Modifier.size(52.dp)
             )
             Spacer(Modifier.height(16.dp))
-            Text(text = "Search the NASA library", style = SoraType.Body)
+            Text(text = hint, style = SoraType.Body)
         }
     }
 }
@@ -238,7 +240,7 @@ private fun LoadingContent() {
 }
 
 @Composable
-private fun ErrorContent(message: String, onRetry: () -> Unit) {
+private fun ErrorContent(message: String, retryLabel: String, onRetry: () -> Unit) {
     Column(
         modifier            = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -254,7 +256,7 @@ private fun ErrorContent(message: String, onRetry: () -> Unit) {
         Text(text = message, style = SoraType.Body)
         Spacer(Modifier.height(16.dp))
         TextButton(onClick = onRetry) {
-            Text("Retry", color = SoraColors.Accent)
+            Text(retryLabel, color = SoraColors.Accent)
         }
     }
 }

@@ -29,11 +29,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.theme.SoraColors
 import com.yumedev.soraspace.ui.theme.SoraType
 
 @Composable
 fun FavoritesScreen(onBack: () -> Unit) {
+    val s = LocalStrings.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -62,7 +65,7 @@ fun FavoritesScreen(onBack: () -> Unit) {
                     modifier = Modifier.size(18.dp)
                 )
             }
-            Text(text = "FAVORITES", style = SoraType.Label)
+            Text(text = s.screenFavorites, style = SoraType.Label)
         }
     }
 
@@ -78,8 +81,8 @@ fun FavoritesScreen(onBack: () -> Unit) {
             modifier = Modifier.size(52.dp)
         )
         Spacer(Modifier.height(20.dp))
-        Text(text = "No favorites yet", style = SoraType.Title)
+        Text(text = s.favoritesEmptyTitle, style = SoraType.Title)
         Spacer(Modifier.height(8.dp))
-        Text(text = "Save images from APOD to find them here", style = SoraType.Body)
+        Text(text = s.favoritesEmptySubtitle, style = SoraType.Body)
     }
 }

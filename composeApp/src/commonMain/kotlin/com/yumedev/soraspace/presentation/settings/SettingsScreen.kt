@@ -37,16 +37,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.yumedev.soraspace.domain.model.AppLanguage
+import com.yumedev.soraspace.ui.strings.LocalCurrentLanguage
+import com.yumedev.soraspace.ui.strings.LocalLanguageSetter
+import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.theme.SoraColors
 import com.yumedev.soraspace.ui.theme.SoraType
 
 enum class AppTheme { System, Light, Dark }
-enum class AppLanguage { English, Español }
 
 @Composable
 fun SettingsScreen(onBack: () -> Unit) {
+    val s               = LocalStrings.current
+    val currentLanguage = LocalCurrentLanguage.current
+    val setLanguage     = LocalLanguageSetter.current
+
     var theme by rememberSaveable { mutableStateOf(AppTheme.System) }
-    var language by rememberSaveable { mutableStateOf(AppLanguage.English) }
 
     Column(
         modifier = Modifier
@@ -76,17 +82,21 @@ fun SettingsScreen(onBack: () -> Unit) {
                     modifier           = Modifier.size(18.dp)
                 )
             }
-            Text(text = "SETTINGS", style = SoraType.Label)
+            Text(text = s.screenSettings, style = SoraType.Label)
         }
 
         Spacer(Modifier.height(32.dp))
 
-        SettingsSectionHeader("APPEARANCE")
+        SettingsSectionHeader(s.sectionAppearance)
         Spacer(Modifier.height(8.dp))
         SettingsGroup {
             AppTheme.entries.forEachIndexed { index, option ->
                 SettingsOptionRow(
-                    label       = option.name,
+                    label       = when (option) {
+                        AppTheme.System -> s.themeSystem
+                        AppTheme.Light  -> s.themeLight
+                        AppTheme.Dark   -> s.themeDark
+                    },
                     selected    = theme == option,
                     showDivider = index < AppTheme.entries.lastIndex,
                     onClick     = { theme = option }
@@ -96,27 +106,30 @@ fun SettingsScreen(onBack: () -> Unit) {
 
         Spacer(Modifier.height(24.dp))
 
-        SettingsSectionHeader("LANGUAGE")
+        SettingsSectionHeader(s.sectionLanguage)
         Spacer(Modifier.height(8.dp))
         SettingsGroup {
-            AppLanguage.entries.forEachIndexed { index, option ->
+            AppLanguage.entries.forEachIndexed { index, lang ->
                 SettingsOptionRow(
-                    label       = option.name,
-                    selected    = language == option,
+                    label       = when (lang) {
+                        AppLanguage.English -> s.langEnglish
+                        AppLanguage.Spanish -> s.langSpanish
+                    },
+                    selected    = currentLanguage == lang,
                     showDivider = index < AppLanguage.entries.lastIndex,
-                    onClick     = { language = option }
+                    onClick     = { setLanguage(lang) }
                 )
             }
         }
 
         Spacer(Modifier.height(24.dp))
 
-        SettingsSectionHeader("ABOUT")
+        SettingsSectionHeader(s.sectionAbout)
         Spacer(Modifier.height(8.dp))
         SettingsGroup {
-            SettingsInfoRow(label = "Version", value = "1.0.0")
+            SettingsInfoRow(label = s.settingVersion, value = "1.0.0")
             SettingsDivider()
-            SettingsInfoRow(label = "Data source", value = "NASA Open APIs")
+            SettingsInfoRow(label = s.settingDataSource, value = "NASA Open APIs")
         }
     }
 }

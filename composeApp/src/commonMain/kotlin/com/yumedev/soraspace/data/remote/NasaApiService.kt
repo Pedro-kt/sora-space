@@ -2,7 +2,7 @@ package com.yumedev.soraspace.data.remote
 
 import com.yumedev.soraspace.data.remote.dto.ApodDto
 import com.yumedev.soraspace.data.remote.dto.AsteroidFeedDto
-import com.yumedev.soraspace.data.remote.dto.MarsPhotosResponse
+import com.yumedev.soraspace.data.remote.dto.EonetResponseDto
 import com.yumedev.soraspace.data.remote.dto.NasaAssetResponse
 import com.yumedev.soraspace.data.remote.dto.NasaMediaCollectionResponse
 import io.ktor.client.request.get
@@ -30,12 +30,6 @@ class NasaApiService {
             parameter("end_date", endDate)
         })
 
-    suspend fun getMarsPhotos(rover: String, earthDate: String): MarsPhotosResponse =
-        json.decodeFromString(fetch("$BASE_URL/mars-photos/api/v1/rovers/$rover/photos") {
-            parameter("api_key", API_KEY)
-            parameter("earth_date", earthDate)
-        })
-
     suspend fun getAsteroidFeed(startDate: String, endDate: String): AsteroidFeedDto =
         json.decodeFromString(fetch("$BASE_URL/neo/rest/v1/feed") {
             parameter("api_key", API_KEY)
@@ -50,6 +44,12 @@ class NasaApiService {
         json.decodeFromString(fetch("$MEDIA_BASE_URL/search") {
             parameter("q", query)
             parameter("media_type", "image,video")
+        })
+
+    suspend fun getEonetEvents(): EonetResponseDto =
+        json.decodeFromString(fetch("$EONET_BASE_URL/events") {
+            parameter("status", "open")
+            parameter("limit", "100")
         })
 
     private suspend fun fetch(
@@ -74,8 +74,9 @@ class NasaApiService {
     }
 
     companion object {
-        private const val BASE_URL = "https://api.nasa.gov"
+        private const val BASE_URL       = "https://api.nasa.gov"
         private const val MEDIA_BASE_URL = "https://images-api.nasa.gov"
+        private const val EONET_BASE_URL = "https://eonet.gsfc.nasa.gov/api/v3"
         private val API_KEY = com.yumedev.soraspace.BuildConfig.NASA_API_KEY
     }
 }
