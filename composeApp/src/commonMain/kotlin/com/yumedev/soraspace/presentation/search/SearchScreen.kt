@@ -38,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -391,6 +392,7 @@ private fun CategoryChip(
 ) {
     Box(
         modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
             .background(
                 color = if (isSelected) color.copy(alpha = 0.2f) else SoraColors.Surface,
                 shape = RoundedCornerShape(20.dp)
