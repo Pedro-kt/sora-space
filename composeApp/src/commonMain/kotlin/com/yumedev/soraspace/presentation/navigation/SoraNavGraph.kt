@@ -12,26 +12,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.yumedev.soraspace.data.repository.ApodRepositoryImpl
-import com.yumedev.soraspace.data.repository.AsteroidRepositoryImpl
 import com.yumedev.soraspace.data.repository.MediaRepositoryImpl
 import com.yumedev.soraspace.domain.model.NasaMedia
 import com.yumedev.soraspace.presentation.apod.ApodScreen
 import com.yumedev.soraspace.presentation.apod.ApodViewModel
-import com.yumedev.soraspace.presentation.favorites.FavoritesScreen
-import com.yumedev.soraspace.presentation.home.HomeScreen
+import com.yumedev.soraspace.presentation.main.MainScreen
 import com.yumedev.soraspace.presentation.media_explorer.MediaDetailScreen
 import com.yumedev.soraspace.presentation.media_explorer.MediaDetailViewModel
-import com.yumedev.soraspace.presentation.media_explorer.MediaExplorerViewModel
-import com.yumedev.soraspace.presentation.media_explorer.MarsScreen
-import com.yumedev.soraspace.presentation.search.SearchScreen
-import com.yumedev.soraspace.presentation.search.SearchViewModel
 import kotlinx.serialization.Serializable
 
+@Serializable object MainRoute
 @Serializable object HomeRoute
 @Serializable object ApodRoute
 @Serializable object MarsRoute
 @Serializable object SearchRoute
 @Serializable object FavoritesRoute
+@Serializable object SettingsRoute
 
 @Serializable
 data class MediaDetailRoute(
@@ -50,7 +46,7 @@ fun SoraNavGraph() {
 
     NavHost(
         navController    = navController,
-        startDestination = HomeRoute,
+        startDestination = MainRoute,
         enterTransition  = {
             slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) +
             fadeIn(animationSpec = tween(300))
@@ -68,26 +64,10 @@ fun SoraNavGraph() {
             fadeOut(animationSpec = tween(200))
         }
     ) {
-        composable<HomeRoute> {
-            HomeScreen(
-                onNavigateToApod      = { navController.navigate(ApodRoute) },
-                onNavigateToMars      = { navController.navigate(MarsRoute) },
-                onNavigateToSearch    = { navController.navigate(SearchRoute) },
-                onNavigateToFavorites = { navController.navigate(FavoritesRoute) }
-            )
-        }
-
-        composable<ApodRoute> {
-            val vm = viewModel { ApodViewModel(ApodRepositoryImpl()) }
-            ApodScreen(viewModel = vm, onBack = { navController.popBackStack() })
-        }
-
-        composable<MarsRoute> {
-            val vm = viewModel { MediaExplorerViewModel(MediaRepositoryImpl()) }
-            MarsScreen(
-                viewModel          = vm,
-                onBack             = { navController.popBackStack() },
-                onNavigateToDetail = { media ->
+        composable<MainRoute> {
+            MainScreen(
+                onNavigateToApod        = { navController.navigate(ApodRoute) },
+                onNavigateToMediaDetail = { media ->
                     navController.navigate(
                         MediaDetailRoute(
                             nasaId       = media.id,
@@ -101,6 +81,11 @@ fun SoraNavGraph() {
                     )
                 }
             )
+        }
+
+        composable<ApodRoute> {
+            val vm = viewModel { ApodViewModel(ApodRepositoryImpl()) }
+            ApodScreen(viewModel = vm, onBack = { navController.popBackStack() })
         }
 
         composable<MediaDetailRoute> { backStackEntry ->
@@ -122,15 +107,6 @@ fun SoraNavGraph() {
                 viewModel = vm,
                 onBack    = { navController.popBackStack() }
             )
-        }
-
-        composable<SearchRoute> {
-            val vm = viewModel { SearchViewModel(AsteroidRepositoryImpl()) }
-            SearchScreen(viewModel = vm, onBack = { navController.popBackStack() })
-        }
-
-        composable<FavoritesRoute> {
-            FavoritesScreen(onBack = { navController.popBackStack() })
         }
     }
 }

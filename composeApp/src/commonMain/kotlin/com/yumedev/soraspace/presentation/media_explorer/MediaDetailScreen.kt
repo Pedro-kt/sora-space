@@ -51,10 +51,12 @@ fun MediaDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val uriHandler = LocalUriHandler.current
 
-    val imageUrl = when (val s = uiState) {
-        is MediaDetailUiState.Success -> s.assetUrl
-        else                         -> media.thumbnailUrl
-    }
+    //val imageUrl = when (val s = uiState) {
+    //    is MediaDetailUiState.Success -> s.assetUrl
+    //    else                         -> media.thumbnailUrl
+    //}
+
+    val imageUrl = media.thumbnailUrl
 
     Column(
         modifier = Modifier
