@@ -43,6 +43,16 @@ sealed class Strings {
     // ─── EONET categories ─────────────────────────────────────────────────────
     abstract fun eonetCategoryName(id: String): String
 
+    // ─── Space Weather (DONKI) ────────────────────────────────────────────────
+    abstract val spaceWeatherLabel: String
+    abstract val spaceWeatherQuiet: String
+    abstract val spaceWeatherMinor: String
+    abstract val spaceWeatherModerate: String
+    abstract val spaceWeatherSevere: String
+    abstract val spaceWeatherNoFlares: String
+    abstract val spaceWeatherLatest: String
+    abstract fun spaceWeatherFlareCount(n: Int): String
+
     // ─── APOD ─────────────────────────────────────────────────────────────────
     abstract val apodSectionLabel: String
     abstract val apodRecentDays: String
@@ -111,6 +121,15 @@ sealed class Strings {
         override val retry             = "Retry"
         override fun asteroidsCount(n: Int)                  = "$n objects"
         override fun eventsCount(shown: Int, total: Int)     = "$shown of $total"
+
+        override val spaceWeatherLabel        = "SPACE WEATHER"
+        override val spaceWeatherQuiet        = "Quiet"
+        override val spaceWeatherMinor        = "Minor Activity"
+        override val spaceWeatherModerate     = "Moderate"
+        override val spaceWeatherSevere       = "Severe"
+        override val spaceWeatherNoFlares     = "No significant solar activity"
+        override val spaceWeatherLatest       = "Latest"
+        override fun spaceWeatherFlareCount(n: Int) = "$n ${if (n == 1) "flare" else "flares"} · last 7 days"
 
         override val apodSectionLabel = "ASTRONOMY PICTURE OF THE DAY"
         override val apodRecentDays   = "RECENT DAYS"
@@ -194,6 +213,15 @@ sealed class Strings {
         override val retry             = "Reintentar"
         override fun asteroidsCount(n: Int)                  = "$n objetos"
         override fun eventsCount(shown: Int, total: Int)     = "$shown de $total"
+
+        override val spaceWeatherLabel        = "CLIMA ESPACIAL"
+        override val spaceWeatherQuiet        = "Tranquilo"
+        override val spaceWeatherMinor        = "Actividad Menor"
+        override val spaceWeatherModerate     = "Moderado"
+        override val spaceWeatherSevere       = "Severo"
+        override val spaceWeatherNoFlares     = "Sin actividad solar significativa"
+        override val spaceWeatherLatest       = "Último"
+        override fun spaceWeatherFlareCount(n: Int) = "$n ${if (n == 1) "destello" else "destellos"} · últimos 7 días"
 
         override val apodSectionLabel = "IMAGEN ASTRONÓMICA DEL DÍA"
         override val apodRecentDays   = "DÍAS RECIENTES"

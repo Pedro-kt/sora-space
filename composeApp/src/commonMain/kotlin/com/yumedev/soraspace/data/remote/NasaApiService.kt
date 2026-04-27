@@ -2,6 +2,7 @@ package com.yumedev.soraspace.data.remote
 
 import com.yumedev.soraspace.data.remote.dto.ApodDto
 import com.yumedev.soraspace.data.remote.dto.AsteroidFeedDto
+import com.yumedev.soraspace.data.remote.dto.DonkiFlrDto
 import com.yumedev.soraspace.data.remote.dto.EonetResponseDto
 import com.yumedev.soraspace.data.remote.dto.NasaAssetResponse
 import com.yumedev.soraspace.data.remote.dto.NasaMediaCollectionResponse
@@ -44,6 +45,13 @@ class NasaApiService {
         json.decodeFromString(fetch("$MEDIA_BASE_URL/search") {
             parameter("q", query)
             parameter("media_type", "image,video")
+        })
+
+    suspend fun getRecentFlares(startDate: String, endDate: String): List<DonkiFlrDto> =
+        json.decodeFromString(fetch("$BASE_URL/DONKI/FLR") {
+            parameter("api_key", API_KEY)
+            parameter("startDate", startDate)
+            parameter("endDate", endDate)
         })
 
     suspend fun getEonetEvents(): EonetResponseDto =
