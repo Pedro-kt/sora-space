@@ -19,8 +19,10 @@ import com.yumedev.soraspace.presentation.apod.ApodViewModel
 import com.yumedev.soraspace.presentation.main.MainScreen
 import com.yumedev.soraspace.presentation.media_explorer.MediaDetailScreen
 import com.yumedev.soraspace.presentation.media_explorer.MediaDetailViewModel
+import com.yumedev.soraspace.presentation.splash.SplashScreen
 import kotlinx.serialization.Serializable
 
+@Serializable object SplashRoute
 @Serializable object MainRoute
 @Serializable object HomeRoute
 @Serializable object ApodRoute
@@ -46,7 +48,7 @@ fun SoraNavGraph() {
 
     NavHost(
         navController    = navController,
-        startDestination = MainRoute,
+        startDestination = SplashRoute,
         enterTransition  = {
             slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) +
             fadeIn(animationSpec = tween(300))
@@ -64,6 +66,19 @@ fun SoraNavGraph() {
             fadeOut(animationSpec = tween(200))
         }
     ) {
+        composable<SplashRoute>(
+            enterTransition = { fadeIn(animationSpec = tween(400)) },
+            exitTransition  = { fadeOut(animationSpec = tween(600)) }
+        ) {
+            SplashScreen(
+                onSplashFinished = {
+                    navController.navigate(MainRoute) {
+                        popUpTo(SplashRoute) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable<MainRoute> {
             MainScreen(
                 onNavigateToApod        = { navController.navigate(ApodRoute) },
