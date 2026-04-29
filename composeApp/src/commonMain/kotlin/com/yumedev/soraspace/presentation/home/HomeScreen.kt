@@ -13,6 +13,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -256,7 +257,12 @@ private fun SpaceWeatherCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(
-                SoraColors.SurfaceHigh,
+                SoraColors.Background,
+            )
+            .border(
+                color = SoraColors.TextPrimary.copy(0.3f),
+                width = 1.dp,
+                shape = RoundedCornerShape(16.dp)
             )
             .padding(horizontal = 20.dp, vertical = 18.dp)
     ) {
