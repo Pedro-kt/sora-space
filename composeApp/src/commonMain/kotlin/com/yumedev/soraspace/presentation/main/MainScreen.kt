@@ -32,6 +32,7 @@ import androidx.navigation.compose.rememberNavController
 import com.yumedev.soraspace.data.repository.AsteroidRepositoryImpl
 import com.yumedev.soraspace.data.repository.EonetRepositoryImpl
 import com.yumedev.soraspace.data.repository.MediaRepositoryImpl
+import com.yumedev.soraspace.data.repository.SpaceNewsRepositoryImpl
 import com.yumedev.soraspace.data.repository.SpaceWeatherRepositoryImpl
 import com.yumedev.soraspace.domain.model.NasaMedia
 import com.yumedev.soraspace.presentation.favorites.FavoritesScreen
@@ -137,7 +138,7 @@ fun MainScreen(
             exitTransition   = { fadeOut(animationSpec = tween(150)) }
         ) {
             composable<HomeRoute> {
-                val vm = viewModel { HomeViewModel(SpaceWeatherRepositoryImpl()) }
+                val vm = viewModel { HomeViewModel(SpaceWeatherRepositoryImpl(), SpaceNewsRepositoryImpl()) }
                 HomeScreen(
                     viewModel             = vm,
                     onNavigateToApod      = onNavigateToApod,

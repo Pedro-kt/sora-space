@@ -4,6 +4,7 @@ sealed class Strings {
 
     // ─── Home ─────────────────────────────────────────────────────────────────
     abstract val homeTagline: String
+    abstract val homeExploreLabel: String
     abstract val apodLabel: String
     abstract val apodSubtitle: String
     abstract val mediaExplorerLabel: String
@@ -42,6 +43,13 @@ sealed class Strings {
 
     // ─── EONET categories ─────────────────────────────────────────────────────
     abstract fun eonetCategoryName(id: String): String
+
+    // ─── Space News ───────────────────────────────────────────────────────────
+    abstract val newsLatestLabel: String
+    abstract val newsJustNow: String
+    abstract fun newsMinutesAgo(n: Int): String
+    abstract fun newsHoursAgo(n: Int): String
+    abstract fun newsDaysAgo(n: Int): String
 
     // ─── Space Weather (DONKI) ────────────────────────────────────────────────
     abstract val spaceWeatherLabel: String
@@ -85,6 +93,7 @@ sealed class Strings {
 
     object En : Strings() {
         override val homeTagline           = "Explore the universe"
+        override val homeExploreLabel      = "EXPLORE"
         override val apodLabel             = "ASTRONOMY PICTURE\nOF THE DAY"
         override val apodSubtitle          = "Daily cosmos imagery"
         override val mediaExplorerLabel    = "MEDIA\nEXPLORER"
@@ -121,6 +130,12 @@ sealed class Strings {
         override val retry             = "Retry"
         override fun asteroidsCount(n: Int)                  = "$n objects"
         override fun eventsCount(shown: Int, total: Int)     = "$shown of $total"
+
+        override val newsLatestLabel             = "LATEST NEWS"
+        override val newsJustNow                 = "Just now"
+        override fun newsMinutesAgo(n: Int)      = "${n}m ago"
+        override fun newsHoursAgo(n: Int)        = "${n}h ago"
+        override fun newsDaysAgo(n: Int)         = "${n}d ago"
 
         override val spaceWeatherLabel        = "SPACE WEATHER"
         override val spaceWeatherQuiet        = "Quiet"
@@ -177,6 +192,7 @@ sealed class Strings {
 
     object Es : Strings() {
         override val homeTagline           = "Explora el universo"
+        override val homeExploreLabel      = "EXPLORAR"
         override val apodLabel             = "IMAGEN ASTRONÓMICA\nDEL DÍA"
         override val apodSubtitle          = "Imágenes diarias del cosmos"
         override val mediaExplorerLabel    = "EXPLORADOR\nMULTIMEDIA"
@@ -213,6 +229,12 @@ sealed class Strings {
         override val retry             = "Reintentar"
         override fun asteroidsCount(n: Int)                  = "$n objetos"
         override fun eventsCount(shown: Int, total: Int)     = "$shown de $total"
+
+        override val newsLatestLabel             = "ÚLTIMAS NOTICIAS"
+        override val newsJustNow                 = "Ahora mismo"
+        override fun newsMinutesAgo(n: Int)      = "Hace ${n}m"
+        override fun newsHoursAgo(n: Int)        = "Hace ${n}h"
+        override fun newsDaysAgo(n: Int)         = "Hace ${n}d"
 
         override val spaceWeatherLabel        = "CLIMA ESPACIAL"
         override val spaceWeatherQuiet        = "Tranquilo"
