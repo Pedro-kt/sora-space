@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -36,15 +37,25 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ElevatedFilterChip
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +75,7 @@ import com.yumedev.soraspace.domain.model.SpaceWeather
 import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.strings.Strings
 import com.yumedev.soraspace.ui.theme.SoraColors
+import com.yumedev.soraspace.ui.theme.SoraFonts
 import com.yumedev.soraspace.ui.theme.SoraType
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -88,6 +100,7 @@ fun HomeScreen(
     val s = LocalStrings.current
     val today = remember(s) { formattedToday(s.monthNames) }
     val uiState by viewModel.uiState.collectAsState()
+    var selectedArticle by remember { mutableStateOf<SpaceArticle?>(null) }
 
     Column(
         modifier = Modifier
@@ -130,7 +143,11 @@ fun HomeScreen(
 
         val featured = uiState.featuredArticle
         if (featured != null) {
-            FeaturedStoryCard(article = featured, modifier = Modifier.padding(horizontal = 16.dp))
+            FeaturedStoryCard(
+                article = featured,
+                modifier = Modifier.padding(horizontal = 16.dp),
+                onArticleClick = { selectedArticle = it }
+            )
         }
 
         AnimatedContent(
@@ -147,7 +164,10 @@ fun HomeScreen(
             if (isLoading) {
                 LatestNewsStripSkeleton()
             } else if (uiState.latestNews.isNotEmpty()) {
-                LatestNewsStrip(articles = uiState.latestNews)
+                LatestNewsStrip(
+                    articles = uiState.latestNews,
+                    onArticleClick = { selectedArticle = it }
+                )
             }
         }
 
@@ -191,6 +211,13 @@ fun HomeScreen(
             backgroundImage = Res.drawable.nebulous,
             modifier = Modifier.height(130.dp).padding(horizontal = 16.dp),
             onClick = onNavigateToFavorites
+        )
+    }
+
+    selectedArticle?.let { article ->
+        ArticleDetailSheet(
+            article = article,
+            onDismiss = { selectedArticle = null }
         )
     }
 }
@@ -322,13 +349,13 @@ private fun NavigationTile(
 @Composable
 private fun FeaturedStoryCard(
     article: SpaceArticle,
+    onArticleClick: (SpaceArticle) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val s = LocalStrings.current
-    val uriHandler = LocalUriHandler.current
 
     ElevatedCard(
-        onClick = { uriHandler.openUri(article.url) },
+        onClick = { onArticleClick(article) },
         modifier = modifier.fillMaxWidth().height(220.dp),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
@@ -384,6 +411,7 @@ private fun FeaturedStoryCard(
 @Composable
 private fun LatestNewsStrip(
     articles: List<SpaceArticle>,
+    onArticleClick: (SpaceArticle) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val s = LocalStrings.current
@@ -399,7 +427,7 @@ private fun LatestNewsStrip(
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             items(articles) { article ->
-                NewsCard(article = article)
+                NewsCard(article = article, onArticleClick = onArticleClick)
             }
         }
     }
@@ -408,13 +436,13 @@ private fun LatestNewsStrip(
 @Composable
 private fun NewsCard(
     article: SpaceArticle,
+    onArticleClick: (SpaceArticle) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val s = LocalStrings.current
-    val uriHandler = LocalUriHandler.current
 
     ElevatedCard(
-        onClick = { uriHandler.openUri(article.url) },
+        onClick = { onArticleClick(article) },
         modifier = modifier.width(160.dp).height(180.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)
@@ -566,7 +594,156 @@ private fun LatestNewsStripSkeleton(modifier: Modifier = Modifier) {
     }
 }
 
+// ─── Article Detail Sheet ────────────────────────────────────────────────────
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ArticleDetailSheet(
+    article: SpaceArticle,
+    onDismiss: () -> Unit
+) {
+    val s = LocalStrings.current
+    val uriHandler = LocalUriHandler.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val spaceGrotesk = SoraFonts.SpaceGrotesk
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = SoraColors.Surface,
+        contentColor = SoraColors.TextPrimary,
+        tonalElevation = 0.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding()
+        ) {
+            // Hero image
+            AsyncImage(
+                model = article.imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+            )
+
+            Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+                Spacer(Modifier.height(20.dp))
+
+                // Source
+                Text(
+                    text = article.newsSite.uppercase(),
+                    style = SoraType.Label
+                )
+                Spacer(Modifier.height(8.dp))
+
+                // Title
+                Text(
+                    text = article.title,
+                    style = SoraType.Title.copy(fontSize = 20.sp, lineHeight = 27.sp)
+                )
+
+                // Authors
+                if (article.authors.isNotEmpty()) {
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        text = "${s.newsBy} ${article.authors.joinToString(", ")}",
+                        style = SoraType.Caption.copy(fontFamily = spaceGrotesk)
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                // Summary
+                Text(
+                    text = article.summary,
+                    style = SoraType.Body
+                )
+
+                Spacer(Modifier.height(20.dp))
+
+                // Dates row
+                Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                    Column {
+                        Text(
+                            text = s.newsPublishedLabel.uppercase(),
+                            style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                        )
+                        Spacer(Modifier.height(3.dp))
+                        Text(
+                            text = formatSheetDate(article.publishedAt, s.monthNames),
+                            style = SoraType.Caption
+                        )
+                    }
+                    if (article.updatedAt.isNotEmpty() && article.updatedAt != article.publishedAt) {
+                        Column {
+                            Text(
+                                text = s.newsUpdatedLabel.uppercase(),
+                                style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                            )
+                            Spacer(Modifier.height(3.dp))
+                            Text(
+                                text = formatSheetDate(article.updatedAt, s.monthNames),
+                                style = SoraType.Caption
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(28.dp))
+
+                // Read more button
+                Button(
+                    onClick = {
+                        uriHandler.openUri(article.url)
+                        onDismiss()
+                    },
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SoraColors.Accent,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text(
+                        text = s.newsReadMore,
+                        style = SoraType.Caption.copy(
+                            fontFamily = spaceGrotesk,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 15.sp,
+                            color = Color.Black
+                        )
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.OpenInNew,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Black
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+@Suppress("DEPRECATION")
+private fun formatSheetDate(isoString: String, monthNames: List<String>): String {
+    return try {
+        val local = Instant.parse(isoString).toLocalDateTime(TimeZone.currentSystemDefault())
+        val month = monthNames.getOrElse(local.monthNumber - 1) { "" }.take(3)
+        "$month ${local.dayOfMonth}, ${local.year}"
+    } catch (_: Exception) { isoString }
+}
 
 @Suppress("DEPRECATION")
 private fun formattedToday(monthNames: List<String>): String {

@@ -7,5 +7,7 @@ data class SpaceArticle(
     val imageUrl: String,
     val newsSite: String,
     val summary: String,
-    val publishedAt: String
+    val publishedAt: String,
+    val updatedAt: String,
+    val authors: List<String>
 )

@@ -20,5 +20,7 @@ private fun ArticleDto.toDomain() = SpaceArticle(
     imageUrl    = imageUrl,
     newsSite    = newsSite,
     summary     = summary,
-    publishedAt = publishedAt
+    publishedAt = publishedAt,
+    updatedAt   = updatedAt,
+    authors     = authors.map { it.name }
 )

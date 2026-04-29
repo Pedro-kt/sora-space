@@ -50,6 +50,10 @@ sealed class Strings {
     abstract fun newsMinutesAgo(n: Int): String
     abstract fun newsHoursAgo(n: Int): String
     abstract fun newsDaysAgo(n: Int): String
+    abstract val newsReadMore: String
+    abstract val newsPublishedLabel: String
+    abstract val newsUpdatedLabel: String
+    abstract val newsBy: String
 
     // ─── Space Weather (DONKI) ────────────────────────────────────────────────
     abstract val spaceWeatherLabel: String
@@ -136,6 +140,10 @@ sealed class Strings {
         override fun newsMinutesAgo(n: Int)      = "${n}m ago"
         override fun newsHoursAgo(n: Int)        = "${n}h ago"
         override fun newsDaysAgo(n: Int)         = "${n}d ago"
+        override val newsReadMore                = "Read more"
+        override val newsPublishedLabel          = "Published"
+        override val newsUpdatedLabel            = "Updated"
+        override val newsBy                      = "By"
 
         override val spaceWeatherLabel        = "SPACE WEATHER"
         override val spaceWeatherQuiet        = "Quiet"
@@ -235,6 +243,10 @@ sealed class Strings {
         override fun newsMinutesAgo(n: Int)      = "Hace ${n}m"
         override fun newsHoursAgo(n: Int)        = "Hace ${n}h"
         override fun newsDaysAgo(n: Int)         = "Hace ${n}d"
+        override val newsReadMore                = "Ver más"
+        override val newsPublishedLabel          = "Publicado"
+        override val newsUpdatedLabel            = "Actualizado"
+        override val newsBy                      = "Por"
 
         override val spaceWeatherLabel        = "CLIMA ESPACIAL"
         override val spaceWeatherQuiet        = "Tranquilo"

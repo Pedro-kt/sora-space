@@ -10,6 +10,11 @@ data class PaginatedArticleListDto(
 )
 
 @Serializable
+data class AuthorDto(
+    val name: String
+)
+
+@Serializable
 data class ArticleDto(
     val id: Int,
     val title: String,
@@ -18,5 +23,7 @@ data class ArticleDto(
     @SerialName("news_site") val newsSite: String,
     val summary: String,
     @SerialName("published_at") val publishedAt: String,
+    @SerialName("updated_at") val updatedAt: String = "",
+    val authors: List<AuthorDto> = emptyList(),
     val featured: Boolean = false
 )
