@@ -54,6 +54,7 @@ sealed class Strings {
     abstract val newsPublishedLabel: String
     abstract val newsUpdatedLabel: String
     abstract val newsBy: String
+    abstract val errorNetworkMessage: String
 
     // ─── Space Weather (DONKI) ────────────────────────────────────────────────
     abstract val spaceWeatherLabel: String
@@ -144,6 +145,7 @@ sealed class Strings {
         override val newsPublishedLabel          = "Published"
         override val newsUpdatedLabel            = "Updated"
         override val newsBy                      = "By"
+        override val errorNetworkMessage         = "Couldn't connect. Check your connection and try again."
 
         override val spaceWeatherLabel        = "SPACE WEATHER"
         override val spaceWeatherQuiet        = "Quiet"
@@ -247,6 +249,7 @@ sealed class Strings {
         override val newsPublishedLabel          = "Publicado"
         override val newsUpdatedLabel            = "Actualizado"
         override val newsBy                      = "Por"
+        override val errorNetworkMessage         = "No se pudo conectar. Verifica tu conexión e intenta de nuevo."
 
         override val spaceWeatherLabel        = "CLIMA ESPACIAL"
         override val spaceWeatherQuiet        = "Tranquilo"

@@ -137,7 +137,9 @@ fun HomeScreen(
         ) { isLoading ->
             if (isLoading) {
                 SpaceWeatherCardSkeleton()
-            } else if (!uiState.hasError && weather != null) {
+            } else if (uiState.hasError) {
+                SpaceWeatherCardError(onRetry = { viewModel.loadSpaceWeather() })
+            } else if (weather != null) {
                 SpaceWeatherCard(weather = weather)
             }
         }
@@ -164,6 +166,8 @@ fun HomeScreen(
         ) { isLoading ->
             if (isLoading) {
                 LatestNewsStripSkeleton()
+            } else if (uiState.hasNewsError) {
+                LatestNewsStripError(onRetry = { viewModel.loadNews() })
             } else if (uiState.latestNews.isNotEmpty()) {
                 LatestNewsStrip(
                     articles = uiState.latestNews,
@@ -498,6 +502,67 @@ private fun NewsCard(
                     text = timeAgo(article.publishedAt, s),
                     style = SoraType.Caption.copy(fontSize = 10.sp)
                 )
+            }
+        }
+    }
+}
+
+// ─── Inline error states ─────────────────────────────────────────────────────
+
+@Composable
+private fun SpaceWeatherCardError(onRetry: () -> Unit) {
+    val s = LocalStrings.current
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(SoraColors.SurfaceHigh)
+            .padding(horizontal = 20.dp, vertical = 18.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = s.errorNetworkMessage,
+                style = SoraType.Caption,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(12.dp))
+            androidx.compose.material3.TextButton(onClick = onRetry) {
+                Text(s.retry, style = SoraType.Label)
+            }
+        }
+    }
+}
+
+@Composable
+private fun LatestNewsStripError(onRetry: () -> Unit) {
+    val s = LocalStrings.current
+    Column {
+        Text(
+            text = s.newsLatestLabel,
+            style = SoraType.Label,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        Spacer(Modifier.height(10.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(SoraColors.SurfaceHigh)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = s.errorNetworkMessage,
+                style = SoraType.Caption,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(12.dp))
+            androidx.compose.material3.TextButton(onClick = onRetry) {
+                Text(s.retry, style = SoraType.Label)
             }
         }
     }

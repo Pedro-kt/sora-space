@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yumedev.soraspace.domain.model.Asteroid
 import com.yumedev.soraspace.domain.model.EonetEvent
+import com.yumedev.soraspace.ui.components.SoraErrorCard
 import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.strings.Strings
 import com.yumedev.soraspace.ui.theme.SoraColors
@@ -168,7 +169,12 @@ private fun AsteroidsContent(
 ) {
     when (state) {
         is SearchUiState.AsteroidsState.Loading -> LoadingContent()
-        is SearchUiState.AsteroidsState.Error   -> ErrorContent(state.message, onRetry, s)
+        is SearchUiState.AsteroidsState.Error   -> SoraErrorCard(
+            title    = s.apodErrorTitle,
+            message  = s.errorNetworkMessage,
+            onRetry  = onRetry,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 24.dp)
+        )
         is SearchUiState.AsteroidsState.Success -> AsteroidList(state.asteroids, state.dateRange, s)
     }
 }
@@ -328,7 +334,12 @@ private fun EarthEventsContent(
     when (state) {
         is SearchUiState.EventsState.Idle,
         is SearchUiState.EventsState.Loading -> LoadingContent()
-        is SearchUiState.EventsState.Error   -> ErrorContent(state.message, onRetry, s)
+        is SearchUiState.EventsState.Error   -> SoraErrorCard(
+            title    = s.apodErrorTitle,
+            message  = s.errorNetworkMessage,
+            onRetry  = onRetry,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 24.dp)
+        )
         is SearchUiState.EventsState.Success -> {
             val categories = state.events
                 .map { it.categoryId to s.eonetCategoryName(it.categoryId) }
@@ -528,27 +539,6 @@ private fun LoadingContent() {
     }
 }
 
-@Composable
-private fun ErrorContent(message: String, onRetry: () -> Unit, s: Strings) {
-    Column(
-        modifier            = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            Icons.Outlined.Search,
-            contentDescription = null,
-            tint     = SoraColors.TextTertiary,
-            modifier = Modifier.size(52.dp)
-        )
-        Spacer(Modifier.height(16.dp))
-        Text(text = message, style = SoraType.Body)
-        Spacer(Modifier.height(16.dp))
-        TextButton(onClick = onRetry) {
-            Text(s.retry, color = SoraColors.Accent)
-        }
-    }
-}
 
 // ─── Category colors ──────────────────────────────────────────────────────────
 

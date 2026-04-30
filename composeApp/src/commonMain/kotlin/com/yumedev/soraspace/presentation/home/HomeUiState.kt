@@ -9,5 +9,6 @@ data class HomeUiState(
     val hasError: Boolean = false,
     val featuredArticle: SpaceArticle? = null,
     val latestNews: List<SpaceArticle> = emptyList(),
-    val isNewsLoading: Boolean = true
+    val isNewsLoading: Boolean = true,
+    val hasNewsError: Boolean = false
 )

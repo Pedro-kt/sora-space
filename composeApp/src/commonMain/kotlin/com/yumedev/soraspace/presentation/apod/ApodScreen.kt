@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.yumedev.soraspace.domain.model.Apod
+import com.yumedev.soraspace.ui.components.SoraErrorCard
 import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.theme.SoraColors
 import com.yumedev.soraspace.ui.theme.SoraType
@@ -69,10 +70,17 @@ fun ApodScreen(viewModel: ApodViewModel, onBack: () -> Unit) {
                 onToggleFavorite = viewModel::toggleFavorite,
                 onBack           = onBack
             )
-            is ApodUiState.Error -> ErrorContent(
-                message = state.message,
-                onRetry = viewModel::loadHome
-            )
+            is ApodUiState.Error -> {
+                val s = LocalStrings.current
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    SoraErrorCard(
+                        title    = s.apodErrorTitle,
+                        message  = s.errorNetworkMessage,
+                        onRetry  = viewModel::loadHome,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -325,44 +333,6 @@ private fun LoadingContent() {
         )
     }
 }
-
-@Composable
-private fun ErrorContent(message: String, onRetry: () -> Unit) {
-    val s = LocalStrings.current
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            modifier            = Modifier.padding(40.dp)
-        ) {
-            Icon(
-                imageVector        = Icons.Filled.WifiOff,
-                contentDescription = null,
-                tint               = SoraColors.Accent,
-                modifier           = Modifier.size(32.dp)
-            )
-            Text(text = s.apodErrorTitle, style = SoraType.Title)
-            Text(
-                text  = message,
-                style = SoraType.Body.copy(textAlign = TextAlign.Center)
-            )
-            OutlinedButton(
-                onClick         = onRetry,
-                shape           = RoundedCornerShape(4.dp),
-                contentPadding  = PaddingValues(horizontal = 32.dp, vertical = 12.dp),
-                colors          = ButtonDefaults.outlinedButtonColors(
-                    contentColor = SoraColors.Accent
-                ),
-                border = androidx.compose.foundation.BorderStroke(
-                    1.dp, SoraColors.Accent.copy(alpha = 0.5f)
-                )
-            ) {
-                Text(s.retry.uppercase(), style = SoraType.Label)
-            }
-        }
-    }
-}
-
 // ─── Componentes compartidos ──────────────────────────────────────────────────
 
 @Composable

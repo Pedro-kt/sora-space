@@ -37,7 +37,7 @@ class HomeViewModel(
 
     fun loadNews() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isNewsLoading = true) }
+            _uiState.update { it.copy(isNewsLoading = true, hasNewsError = false) }
             try {
                 val articles = spaceNewsRepository.getLatestArticles(limit = 6)
                 _uiState.update {
@@ -48,7 +48,7 @@ class HomeViewModel(
                     )
                 }
             } catch (_: Exception) {
-                _uiState.update { it.copy(isNewsLoading = false) }
+                _uiState.update { it.copy(isNewsLoading = false, hasNewsError = true) }
             }
         }
     }
