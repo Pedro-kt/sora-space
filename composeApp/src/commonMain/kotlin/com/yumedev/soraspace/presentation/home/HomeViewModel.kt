@@ -2,6 +2,7 @@ package com.yumedev.soraspace.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yumedev.soraspace.domain.repository.LaunchRepository
 import com.yumedev.soraspace.domain.repository.SpaceNewsRepository
 import com.yumedev.soraspace.domain.repository.SpaceWeatherRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +13,8 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val spaceWeatherRepository: SpaceWeatherRepository,
-    private val spaceNewsRepository: SpaceNewsRepository
+    private val spaceNewsRepository: SpaceNewsRepository,
+    private val launchRepository: LaunchRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -21,6 +23,7 @@ class HomeViewModel(
     init {
         loadSpaceWeather()
         loadNews()
+        loadLaunches()
     }
 
     fun loadSpaceWeather() {
@@ -49,6 +52,18 @@ class HomeViewModel(
                 }
             } catch (_: Exception) {
                 _uiState.update { it.copy(isNewsLoading = false, hasNewsError = true) }
+            }
+        }
+    }
+
+    fun loadLaunches() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLaunchesLoading = true, hasLaunchesError = false) }
+            try {
+                val launches = launchRepository.getUpcomingLaunches(limit = 6)
+                _uiState.update { it.copy(launches = launches, isLaunchesLoading = false) }
+            } catch (_: Exception) {
+                _uiState.update { it.copy(isLaunchesLoading = false, hasLaunchesError = true) }
             }
         }
     }

@@ -50,6 +50,7 @@ sealed class Strings {
     abstract fun newsMinutesAgo(n: Int): String
     abstract fun newsHoursAgo(n: Int): String
     abstract fun newsDaysAgo(n: Int): String
+    abstract val launchesLabel: String
     abstract val newsReadMore: String
     abstract val newsPublishedLabel: String
     abstract val newsUpdatedLabel: String
@@ -141,6 +142,7 @@ sealed class Strings {
         override fun newsMinutesAgo(n: Int)      = "${n}m ago"
         override fun newsHoursAgo(n: Int)        = "${n}h ago"
         override fun newsDaysAgo(n: Int)         = "${n}d ago"
+        override val launchesLabel               = "UPCOMING LAUNCHES"
         override val newsReadMore                = "Read more"
         override val newsPublishedLabel          = "Published"
         override val newsUpdatedLabel            = "Updated"
@@ -245,6 +247,7 @@ sealed class Strings {
         override fun newsMinutesAgo(n: Int)      = "Hace ${n}m"
         override fun newsHoursAgo(n: Int)        = "Hace ${n}h"
         override fun newsDaysAgo(n: Int)         = "Hace ${n}d"
+        override val launchesLabel               = "PRÓXIMOS LANZAMIENTOS"
         override val newsReadMore                = "Ver más"
         override val newsPublishedLabel          = "Publicado"
         override val newsUpdatedLabel            = "Actualizado"

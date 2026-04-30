@@ -72,6 +72,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.yumedev.soraspace.domain.model.ActivityLevel
 import com.yumedev.soraspace.domain.model.SpaceArticle
+import com.yumedev.soraspace.domain.model.SpaceLaunch
 import com.yumedev.soraspace.domain.model.SpaceWeather
 import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.strings.Strings
@@ -173,6 +174,26 @@ fun HomeScreen(
                     articles = uiState.latestNews,
                     onArticleClick = { selectedArticle = it }
                 )
+            }
+        }
+
+        AnimatedContent(
+            targetState = uiState.isLaunchesLoading,
+            transitionSpec = {
+                if (targetState) {
+                    fadeIn(tween(200)) togetherWith fadeOut(tween(200))
+                } else {
+                    (fadeIn(tween(400)) + slideInVertically(tween(400)) { it / 6 }) togetherWith
+                    fadeOut(tween(150))
+                }
+            }
+        ) { isLoading ->
+            if (isLoading) {
+                LaunchesSectionSkeleton()
+            } else if (uiState.hasLaunchesError) {
+                LaunchesSectionError(onRetry = { viewModel.loadLaunches() })
+            } else if (uiState.launches.isNotEmpty()) {
+                LaunchesSection(launches = uiState.launches)
             }
         }
 
@@ -507,6 +528,186 @@ private fun NewsCard(
     }
 }
 
+// ─── Launches Section ────────────────────────────────────────────────────────
+
+@Composable
+private fun LaunchesSection(
+    launches: List<SpaceLaunch>,
+    modifier: Modifier = Modifier
+) {
+    val s = LocalStrings.current
+    Column(modifier = modifier) {
+        Text(
+            text     = s.launchesLabel,
+            style    = SoraType.Label,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        Spacer(Modifier.height(10.dp))
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding        = PaddingValues(horizontal = 16.dp)
+        ) {
+            items(launches, key = { it.id }) { launch ->
+                LaunchCard(launch = launch)
+            }
+        }
+    }
+}
+
+@Composable
+private fun LaunchCard(
+    launch: SpaceLaunch,
+    modifier: Modifier = Modifier
+) {
+    val s = LocalStrings.current
+    val statusColor = when (launch.statusAbbrev) {
+        "Go"      -> Color(0xFF4CAF50)
+        "TBD"     -> Color(0xFFFFB300)
+        "Hold"    -> Color(0xFFFF6D00)
+        "Success" -> SoraColors.Accent
+        else      -> SoraColors.TextSecondary
+    }
+
+    ElevatedCard(
+        modifier  = modifier.width(190.dp).height(180.dp),
+        shape     = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)
+    ) {
+        Box(Modifier.fillMaxSize()) {
+            if (launch.imageUrl != null) {
+                AsyncImage(
+                    model              = launch.imageUrl,
+                    contentDescription = null,
+                    modifier           = Modifier.fillMaxSize(),
+                    contentScale       = ContentScale.Crop
+                )
+            } else {
+                Box(Modifier.fillMaxSize().background(SoraColors.SurfaceHigh))
+            }
+
+            Box(
+                Modifier.fillMaxSize().background(
+                    Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0.0f to Color.Transparent,
+                            0.4f to Color.Black.copy(alpha = 0.55f),
+                            1.0f to Color.Black.copy(alpha = 0.93f)
+                        )
+                    )
+                )
+            )
+
+            // Status badge — top right
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(statusColor.copy(alpha = 0.18f))
+                    .padding(horizontal = 8.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text  = launch.statusAbbrev,
+                    style = SoraType.Label.copy(color = statusColor, fontSize = 9.sp)
+                )
+            }
+
+            // Content — bottom
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(10.dp)
+            ) {
+                if (launch.provider.isNotEmpty()) {
+                    Text(
+                        text  = launch.provider.uppercase(),
+                        style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.sp)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                }
+                Text(
+                    text     = launch.name,
+                    style    = SoraType.Caption.copy(
+                        color      = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = 16.sp
+                    ),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    text  = launchCountdown(launch.net, s),
+                    style = SoraType.Caption.copy(fontSize = 10.sp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LaunchesSectionError(onRetry: () -> Unit) {
+    val s = LocalStrings.current
+    Column {
+        Text(
+            text     = s.launchesLabel,
+            style    = SoraType.Label,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        Spacer(Modifier.height(10.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(SoraColors.SurfaceHigh)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text     = s.errorNetworkMessage,
+                style    = SoraType.Caption,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(12.dp))
+            androidx.compose.material3.TextButton(onClick = onRetry) {
+                Text(s.retry, style = SoraType.Label)
+            }
+        }
+    }
+}
+
+@Composable
+private fun LaunchesSectionSkeleton(modifier: Modifier = Modifier) {
+    val shimmer = shimmerBrush()
+    Column(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .height(10.dp)
+                .width(150.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(shimmer)
+        )
+        Spacer(Modifier.height(10.dp))
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding        = PaddingValues(horizontal = 16.dp),
+            userScrollEnabled     = false
+        ) {
+            items(4) {
+                Box(
+                    modifier = Modifier
+                        .width(190.dp)
+                        .height(180.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(shimmer)
+                )
+            }
+        }
+    }
+}
+
 // ─── Inline error states ─────────────────────────────────────────────────────
 
 @Composable
@@ -806,6 +1007,21 @@ private fun ArticleDetailSheet(
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+@Suppress("DEPRECATION")
+private fun launchCountdown(netStr: String, strings: Strings): String {
+    return try {
+        val net  = Instant.parse(netStr)
+        val diff = net - Clock.System.now()
+        when {
+            diff.inWholeHours  <  1 -> "< 1h"
+            diff.inWholeHours  < 24 -> "in ${diff.inWholeHours}h"
+            diff.inWholeDays   <  2 -> "Tomorrow"
+            diff.inWholeDays   <  7 -> "in ${diff.inWholeDays}d"
+            else                    -> formatSheetDate(netStr, strings.monthNames)
+        }
+    } catch (_: Exception) { "TBD" }
+}
 
 @Suppress("DEPRECATION")
 private fun formatSheetDate(isoString: String, monthNames: List<String>): String {
