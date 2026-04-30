@@ -14,14 +14,20 @@ class LaunchRepositoryImpl : LaunchRepository {
 }
 
 private fun LaunchDto.toDomain() = SpaceLaunch(
-    id           = id,
-    name         = name,
-    net          = net,
-    statusName   = status.name,
-    statusAbbrev = status.abbrev,
-    provider     = provider?.name.orEmpty(),
-    missionType  = mission?.type.orEmpty(),
-    padName      = pad?.name.orEmpty(),
-    location     = pad?.location?.name.orEmpty(),
-    imageUrl     = image?.imageUrl
+    id                 = id,
+    name               = name,
+    net                = net,
+    url                = url,
+    windowStart        = windowStart,
+    windowEnd          = windowEnd,
+    statusName         = status.name,
+    statusAbbrev       = status.abbrev,
+    provider           = provider?.name.orEmpty(),
+    missionName        = mission?.name.orEmpty(),
+    missionDescription = mission?.description.orEmpty(),
+    missionType        = mission?.type.orEmpty(),
+    orbit              = mission?.orbit?.name.orEmpty(),
+    padName            = pad?.name.orEmpty(),
+    location           = pad?.location?.name.orEmpty(),
+    imageUrl           = image?.imageUrl
 )

@@ -103,6 +103,7 @@ fun HomeScreen(
     val today = remember(s) { formattedToday(s.monthNames) }
     val uiState by viewModel.uiState.collectAsState()
     var selectedArticle by remember { mutableStateOf<SpaceArticle?>(null) }
+    var selectedLaunch  by remember { mutableStateOf<SpaceLaunch?>(null) }
 
     Column(
         modifier = Modifier
@@ -193,7 +194,10 @@ fun HomeScreen(
             } else if (uiState.hasLaunchesError) {
                 LaunchesSectionError(onRetry = { viewModel.loadLaunches() })
             } else if (uiState.launches.isNotEmpty()) {
-                LaunchesSection(launches = uiState.launches)
+                LaunchesSection(
+                    launches      = uiState.launches,
+                    onLaunchClick = { selectedLaunch = it }
+                )
             }
         }
 
@@ -244,6 +248,13 @@ fun HomeScreen(
         ArticleDetailSheet(
             article = article,
             onDismiss = { selectedArticle = null }
+        )
+    }
+
+    selectedLaunch?.let { launch ->
+        LaunchDetailSheet(
+            launch    = launch,
+            onDismiss = { selectedLaunch = null }
         )
     }
 }
@@ -533,6 +544,7 @@ private fun NewsCard(
 @Composable
 private fun LaunchesSection(
     launches: List<SpaceLaunch>,
+    onLaunchClick: (SpaceLaunch) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val s = LocalStrings.current
@@ -548,7 +560,7 @@ private fun LaunchesSection(
             contentPadding        = PaddingValues(horizontal = 16.dp)
         ) {
             items(launches, key = { it.id }) { launch ->
-                LaunchCard(launch = launch)
+                LaunchCard(launch = launch, onClick = { onLaunchClick(launch) })
             }
         }
     }
@@ -557,6 +569,7 @@ private fun LaunchesSection(
 @Composable
 private fun LaunchCard(
     launch: SpaceLaunch,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val s = LocalStrings.current
@@ -569,6 +582,7 @@ private fun LaunchCard(
     }
 
     ElevatedCard(
+        onClick   = onClick,
         modifier  = modifier.width(190.dp).height(180.dp),
         shape     = RoundedCornerShape(12.dp),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)
@@ -999,6 +1013,228 @@ private fun ArticleDetailSheet(
                         tint = Color.Black
                     )
                 }
+
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+// ─── Launch Detail Sheet ─────────────────────────────────────────────────────
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LaunchDetailSheet(
+    launch: SpaceLaunch,
+    onDismiss: () -> Unit
+) {
+    val s = LocalStrings.current
+    val uriHandler = LocalUriHandler.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val spaceGrotesk = SoraFonts.SpaceGrotesk
+
+    val statusColor = when (launch.statusAbbrev) {
+        "Go"      -> Color(0xFF4CAF50)
+        "TBD"     -> Color(0xFFFFB300)
+        "Hold"    -> Color(0xFFFF6D00)
+        "Success" -> SoraColors.Accent
+        else      -> SoraColors.TextSecondary
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState       = sheetState,
+        containerColor   = SoraColors.Surface,
+        contentColor     = SoraColors.TextPrimary,
+        tonalElevation   = 0.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding()
+        ) {
+            // Hero image / placeholder
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+            ) {
+                if (launch.imageUrl != null) {
+                    AsyncImage(
+                        model              = launch.imageUrl,
+                        contentDescription = null,
+                        contentScale       = ContentScale.Crop,
+                        modifier           = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Box(Modifier.fillMaxSize().background(SoraColors.SurfaceHigh))
+                }
+                Box(
+                    Modifier.fillMaxSize().background(
+                        Brush.verticalGradient(
+                            colorStops = arrayOf(
+                                0.0f to Color.Transparent,
+                                0.55f to Color.Black.copy(alpha = 0.3f),
+                                1.0f to Color.Black.copy(alpha = 0.5f)
+                            )
+                        )
+                    )
+                )
+                // Status badge — top right
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(statusColor.copy(alpha = 0.20f))
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text  = launch.statusName,
+                        style = SoraType.Label.copy(color = statusColor, fontSize = 10.sp)
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+                Spacer(Modifier.height(20.dp))
+
+                if (launch.provider.isNotEmpty()) {
+                    Text(text = launch.provider.uppercase(), style = SoraType.Label)
+                    Spacer(Modifier.height(8.dp))
+                }
+
+                Text(
+                    text  = launch.name,
+                    style = SoraType.Title.copy(fontSize = 20.sp, lineHeight = 27.sp)
+                )
+
+                if (launch.missionDescription.isNotEmpty()) {
+                    Spacer(Modifier.height(16.dp))
+                    Text(text = launch.missionDescription, style = SoraType.Body)
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                // Date + window row
+                Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                    Column {
+                        Text(
+                            text  = s.launchNetLabel.uppercase(),
+                            style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                        )
+                        Spacer(Modifier.height(3.dp))
+                        Text(
+                            text  = formatSheetDate(launch.net, s.monthNames),
+                            style = SoraType.Caption
+                        )
+                    }
+                    if (!launch.windowStart.isNullOrEmpty()) {
+                        Column {
+                            Text(
+                                text  = s.launchWindowLabel.uppercase(),
+                                style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                            )
+                            Spacer(Modifier.height(3.dp))
+                            Text(
+                                text  = formatSheetDate(launch.windowStart, s.monthNames),
+                                style = SoraType.Caption
+                            )
+                        }
+                    }
+                }
+
+                // Pad + location row
+                if (launch.padName.isNotEmpty() || launch.location.isNotEmpty()) {
+                    Spacer(Modifier.height(20.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                        if (launch.padName.isNotEmpty()) {
+                            Column {
+                                Text(
+                                    text  = s.launchPadLabel.uppercase(),
+                                    style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                                )
+                                Spacer(Modifier.height(3.dp))
+                                Text(text = launch.padName, style = SoraType.Caption)
+                            }
+                        }
+                        if (launch.location.isNotEmpty()) {
+                            Column {
+                                Text(
+                                    text  = s.launchLocationLabel.uppercase(),
+                                    style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                                )
+                                Spacer(Modifier.height(3.dp))
+                                Text(text = launch.location, style = SoraType.Caption)
+                            }
+                        }
+                    }
+                }
+
+                // Mission type + orbit row
+                if (launch.missionType.isNotEmpty() || launch.orbit.isNotEmpty()) {
+                    Spacer(Modifier.height(20.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                        if (launch.missionType.isNotEmpty()) {
+                            Column {
+                                Text(
+                                    text  = s.launchMissionLabel.uppercase(),
+                                    style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                                )
+                                Spacer(Modifier.height(3.dp))
+                                Text(text = launch.missionType, style = SoraType.Caption)
+                            }
+                        }
+                        if (launch.orbit.isNotEmpty()) {
+                            Column {
+                                Text(
+                                    text  = s.launchOrbitLabel.uppercase(),
+                                    style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                                )
+                                Spacer(Modifier.height(3.dp))
+                                Text(text = launch.orbit, style = SoraType.Caption)
+                            }
+                        }
+                    }
+                }
+/*
+                if (launch.url.isNotEmpty()) {
+                    Spacer(Modifier.height(28.dp))
+                    Button(
+                        onClick = {
+                            uriHandler.openUri(launch.url)
+                            onDismiss()
+                        },
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape    = RoundedCornerShape(14.dp),
+                        colors   = ButtonDefaults.buttonColors(
+                            containerColor = SoraColors.Accent,
+                            contentColor   = Color.Black
+                        )
+                    ) {
+                        Text(
+                            text  = s.newsReadMore,
+                            style = SoraType.Caption.copy(
+                                fontFamily  = spaceGrotesk,
+                                fontWeight  = FontWeight.SemiBold,
+                                fontSize    = 15.sp,
+                                color       = Color.Black
+                            )
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Icon(
+                            imageVector        = Icons.AutoMirrored.Rounded.OpenInNew,
+                            contentDescription = null,
+                            modifier           = Modifier.size(16.dp),
+                            tint               = Color.Black
+                        )
+                    }
+                }
+
+ */
 
                 Spacer(Modifier.height(8.dp))
             }

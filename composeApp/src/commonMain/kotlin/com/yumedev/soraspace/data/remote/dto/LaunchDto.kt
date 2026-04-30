@@ -14,6 +14,9 @@ data class LaunchDto(
     val id: String,
     val name: String,
     val net: String = "",
+    val url: String = "",
+    @SerialName("window_start") val windowStart: String? = null,
+    @SerialName("window_end") val windowEnd: String? = null,
     val status: LaunchStatusDto = LaunchStatusDto(),
     @SerialName("launch_service_provider") val provider: LaunchProviderDto? = null,
     val mission: LaunchMissionDto? = null,
@@ -38,7 +41,15 @@ data class LaunchProviderDto(
 data class LaunchMissionDto(
     val id: Int = 0,
     val name: String = "",
-    val type: String = ""
+    val description: String = "",
+    val type: String = "",
+    val orbit: LaunchOrbitDto? = null
+)
+
+@Serializable
+data class LaunchOrbitDto(
+    val id: Int = 0,
+    val name: String = ""
 )
 
 @Serializable

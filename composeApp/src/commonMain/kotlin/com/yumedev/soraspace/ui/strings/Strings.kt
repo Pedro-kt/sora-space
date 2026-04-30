@@ -57,6 +57,14 @@ sealed class Strings {
     abstract val newsBy: String
     abstract val errorNetworkMessage: String
 
+    // ─── Launch Detail ────────────────────────────────────────────────────────
+    abstract val launchNetLabel: String
+    abstract val launchWindowLabel: String
+    abstract val launchPadLabel: String
+    abstract val launchLocationLabel: String
+    abstract val launchMissionLabel: String
+    abstract val launchOrbitLabel: String
+
     // ─── Space Weather (DONKI) ────────────────────────────────────────────────
     abstract val spaceWeatherLabel: String
     abstract val spaceWeatherQuiet: String
@@ -148,6 +156,13 @@ sealed class Strings {
         override val newsUpdatedLabel            = "Updated"
         override val newsBy                      = "By"
         override val errorNetworkMessage         = "Couldn't connect. Check your connection and try again."
+
+        override val launchNetLabel      = "Launch Date"
+        override val launchWindowLabel   = "Window"
+        override val launchPadLabel      = "Launch Pad"
+        override val launchLocationLabel = "Location"
+        override val launchMissionLabel  = "Mission Type"
+        override val launchOrbitLabel    = "Orbit"
 
         override val spaceWeatherLabel        = "SPACE WEATHER"
         override val spaceWeatherQuiet        = "Quiet"
@@ -253,6 +268,13 @@ sealed class Strings {
         override val newsUpdatedLabel            = "Actualizado"
         override val newsBy                      = "Por"
         override val errorNetworkMessage         = "No se pudo conectar. Verifica tu conexión e intenta de nuevo."
+
+        override val launchNetLabel      = "Fecha de Lanzamiento"
+        override val launchWindowLabel   = "Ventana"
+        override val launchPadLabel      = "Plataforma"
+        override val launchLocationLabel = "Ubicación"
+        override val launchMissionLabel  = "Tipo de Misión"
+        override val launchOrbitLabel    = "Órbita"
 
         override val spaceWeatherLabel        = "CLIMA ESPACIAL"
         override val spaceWeatherQuiet        = "Tranquilo"
