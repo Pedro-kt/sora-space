@@ -106,11 +106,11 @@ fun HomeScreen(
 ) {
     val s = LocalStrings.current
     val today = remember(s) { formattedToday(s.monthNames) }
-    val uiState              by viewModel.uiState.collectAsState()
-    val favoriteArticleIds   by viewModel.favoriteArticleIds.collectAsState()
-    val favoriteLaunchIds    by viewModel.favoriteLaunchIds.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val favoriteArticleIds by viewModel.favoriteArticleIds.collectAsState()
+    val favoriteLaunchIds by viewModel.favoriteLaunchIds.collectAsState()
     var selectedArticle by remember { mutableStateOf<SpaceArticle?>(null) }
-    var selectedLaunch  by remember { mutableStateOf<SpaceLaunch?>(null) }
+    var selectedLaunch by remember { mutableStateOf<SpaceLaunch?>(null) }
 
     Column(
         modifier = Modifier
@@ -139,7 +139,7 @@ fun HomeScreen(
                     fadeIn(tween(200)) togetherWith fadeOut(tween(200))
                 } else {
                     (fadeIn(tween(400)) + slideInVertically(tween(400)) { it / 6 }) togetherWith
-                    fadeOut(tween(150))
+                            fadeOut(tween(150))
                 }
             },
             modifier = Modifier.padding(horizontal = 16.dp)
@@ -156,11 +156,11 @@ fun HomeScreen(
         val featured = uiState.featuredArticle
         if (featured != null) {
             FeaturedStoryCard(
-                article          = featured,
-                isFavorited      = featured.id in favoriteArticleIds,
+                article = featured,
+                isFavorited = featured.id in favoriteArticleIds,
                 onToggleFavorite = { viewModel.toggleArticleFavorite(featured) },
-                modifier         = Modifier.padding(horizontal = 16.dp),
-                onArticleClick   = { selectedArticle = it }
+                modifier = Modifier.padding(horizontal = 16.dp),
+                onArticleClick = { selectedArticle = it }
             )
         }
 
@@ -171,7 +171,7 @@ fun HomeScreen(
                     fadeIn(tween(200)) togetherWith fadeOut(tween(200))
                 } else {
                     (fadeIn(tween(400)) + slideInVertically(tween(400)) { it / 6 }) togetherWith
-                    fadeOut(tween(150))
+                            fadeOut(tween(150))
                 }
             }
         ) { isLoading ->
@@ -181,9 +181,9 @@ fun HomeScreen(
                 LatestNewsStripError(onRetry = { viewModel.loadNews() })
             } else if (uiState.latestNews.isNotEmpty()) {
                 LatestNewsStrip(
-                    articles         = uiState.latestNews,
-                    favoriteIds      = favoriteArticleIds,
-                    onArticleClick   = { selectedArticle = it },
+                    articles = uiState.latestNews,
+                    favoriteIds = favoriteArticleIds,
+                    onArticleClick = { selectedArticle = it },
                     onToggleFavorite = viewModel::toggleArticleFavorite
                 )
             }
@@ -196,7 +196,7 @@ fun HomeScreen(
                     fadeIn(tween(200)) togetherWith fadeOut(tween(200))
                 } else {
                     (fadeIn(tween(400)) + slideInVertically(tween(400)) { it / 6 }) togetherWith
-                    fadeOut(tween(150))
+                            fadeOut(tween(150))
                 }
             }
         ) { isLoading ->
@@ -206,9 +206,9 @@ fun HomeScreen(
                 LaunchesSectionError(onRetry = { viewModel.loadLaunches() })
             } else if (uiState.launches.isNotEmpty()) {
                 LaunchesSection(
-                    launches         = uiState.launches,
-                    favoriteIds      = favoriteLaunchIds,
-                    onLaunchClick    = { selectedLaunch = it },
+                    launches = uiState.launches,
+                    favoriteIds = favoriteLaunchIds,
+                    onLaunchClick = { selectedLaunch = it },
                     onToggleFavorite = viewModel::toggleLaunchFavorite
                 )
             }
@@ -259,19 +259,19 @@ fun HomeScreen(
 
     selectedArticle?.let { article ->
         ArticleDetailSheet(
-            article          = article,
-            isFavorited      = article.id in favoriteArticleIds,
+            article = article,
+            isFavorited = article.id in favoriteArticleIds,
             onToggleFavorite = { viewModel.toggleArticleFavorite(article) },
-            onDismiss        = { selectedArticle = null }
+            onDismiss = { selectedArticle = null }
         )
     }
 
     selectedLaunch?.let { launch ->
         LaunchDetailSheet(
-            launch           = launch,
-            isFavorited      = launch.id in favoriteLaunchIds,
+            launch = launch,
+            isFavorited = launch.id in favoriteLaunchIds,
             onToggleFavorite = { viewModel.toggleLaunchFavorite(launch) },
-            onDismiss        = { selectedLaunch = null }
+            onDismiss = { selectedLaunch = null }
         )
     }
 }
@@ -300,7 +300,11 @@ private fun SpaceWeatherCard(
     }
 
     val subtext = if (weather.latestFlare != null) {
-        "${s.spaceWeatherLatest}: ${weather.latestFlare.classType} · ${s.spaceWeatherFlareCount(weather.flareCount)}"
+        "${s.spaceWeatherLatest}: ${weather.latestFlare.classType} · ${
+            s.spaceWeatherFlareCount(
+                weather.flareCount
+            )
+        }"
     } else {
         s.spaceWeatherNoFlares
     }
@@ -464,14 +468,14 @@ private fun FeaturedStoryCard(
                 )
             }
             IconButton(
-                onClick  = onToggleFavorite,
+                onClick = onToggleFavorite,
                 modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
             ) {
                 Icon(
-                    imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                     contentDescription = "Favorite",
-                    tint               = if (isFavorited) SoraColors.Accent else Color.White.copy(alpha = 0.8f),
-                    modifier           = Modifier.size(20.dp)
+                    tint = if (isFavorited) SoraColors.Accent else Color.White.copy(alpha = 0.8f),
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
@@ -502,10 +506,10 @@ private fun LatestNewsStrip(
         ) {
             items(articles) { article ->
                 NewsCard(
-                    article          = article,
-                    isFavorited      = article.id in favoriteIds,
+                    article = article,
+                    isFavorited = article.id in favoriteIds,
                     onToggleFavorite = { onToggleFavorite(article) },
-                    onArticleClick   = onArticleClick
+                    onArticleClick = onArticleClick
                 )
             }
         }
@@ -575,14 +579,14 @@ private fun NewsCard(
                 )
             }
             IconButton(
-                onClick  = onToggleFavorite,
+                onClick = onToggleFavorite,
                 modifier = Modifier.align(Alignment.TopEnd).size(32.dp)
             ) {
                 Icon(
-                    imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                     contentDescription = "Favorite",
-                    tint               = if (isFavorited) SoraColors.Accent else Color.White.copy(alpha = 0.7f),
-                    modifier           = Modifier.size(14.dp)
+                    tint = if (isFavorited) SoraColors.Accent else Color.White.copy(alpha = 0.7f),
+                    modifier = Modifier.size(14.dp)
                 )
             }
         }
@@ -602,21 +606,21 @@ private fun LaunchesSection(
     val s = LocalStrings.current
     Column(modifier = modifier) {
         Text(
-            text     = s.launchesLabel,
-            style    = SoraType.Label,
+            text = s.launchesLabel,
+            style = SoraType.Label,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(Modifier.height(10.dp))
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding        = PaddingValues(horizontal = 16.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             items(launches, key = { it.id }) { launch ->
                 LaunchCard(
-                    launch           = launch,
-                    isFavorited      = launch.id in favoriteIds,
+                    launch = launch,
+                    isFavorited = launch.id in favoriteIds,
                     onToggleFavorite = { onToggleFavorite(launch) },
-                    onClick          = { onLaunchClick(launch) }
+                    onClick = { onLaunchClick(launch) }
                 )
             }
         }
@@ -633,26 +637,26 @@ private fun LaunchCard(
 ) {
     val s = LocalStrings.current
     val statusColor = when (launch.statusAbbrev) {
-        "Go"      -> Color(0xFF4CAF50)
-        "TBD"     -> Color(0xFFFFB300)
-        "Hold"    -> Color(0xFFFF6D00)
+        "Go" -> Color(0xFF4CAF50)
+        "TBD" -> Color(0xFFFFB300)
+        "Hold" -> Color(0xFFFF6D00)
         "Success" -> SoraColors.Accent
-        else      -> SoraColors.TextSecondary
+        else -> SoraColors.TextSecondary
     }
 
     ElevatedCard(
-        onClick   = onClick,
-        modifier  = modifier.width(190.dp).height(180.dp),
-        shape     = RoundedCornerShape(12.dp),
+        onClick = onClick,
+        modifier = modifier.width(190.dp).height(180.dp),
+        shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)
     ) {
         Box(Modifier.fillMaxSize()) {
             if (launch.imageUrl != null) {
                 AsyncImage(
-                    model              = launch.imageUrl,
+                    model = launch.imageUrl,
                     contentDescription = null,
-                    modifier           = Modifier.fillMaxSize(),
-                    contentScale       = ContentScale.Crop
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
             } else {
                 Box(Modifier.fillMaxSize().background(SoraColors.SurfaceHigh))
@@ -673,22 +677,11 @@ private fun LaunchCard(
             // Status badge + favorite — top
             Row(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
+                    .fillMaxWidth()
                     .padding(6.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment     = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick  = onToggleFavorite,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                        contentDescription = "Favorite",
-                        tint               = if (isFavorited) SoraColors.Accent else Color.White.copy(alpha = 0.7f),
-                        modifier           = Modifier.size(14.dp)
-                    )
-                }
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
@@ -696,8 +689,19 @@ private fun LaunchCard(
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Text(
-                        text  = launch.statusAbbrev,
+                        text = launch.statusAbbrev,
                         style = SoraType.Label.copy(color = statusColor, fontSize = 9.sp)
+                    )
+                }
+                IconButton(
+                    onClick = onToggleFavorite,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = "Favorite",
+                        tint = if (isFavorited) SoraColors.Accent else Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(14.dp)
                     )
                 }
             }
@@ -710,15 +714,15 @@ private fun LaunchCard(
             ) {
                 if (launch.provider.isNotEmpty()) {
                     Text(
-                        text  = launch.provider.uppercase(),
+                        text = launch.provider.uppercase(),
                         style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.sp)
                     )
                     Spacer(Modifier.height(4.dp))
                 }
                 Text(
-                    text     = launch.name,
-                    style    = SoraType.Caption.copy(
-                        color      = Color.White,
+                    text = launch.name,
+                    style = SoraType.Caption.copy(
+                        color = Color.White,
                         fontWeight = FontWeight.SemiBold,
                         lineHeight = 16.sp
                     ),
@@ -727,7 +731,7 @@ private fun LaunchCard(
                 )
                 Spacer(Modifier.height(3.dp))
                 Text(
-                    text  = launchCountdown(launch.net, s),
+                    text = launchCountdown(launch.net, s),
                     style = SoraType.Caption.copy(fontSize = 10.sp)
                 )
             }
@@ -740,8 +744,8 @@ private fun LaunchesSectionError(onRetry: () -> Unit) {
     val s = LocalStrings.current
     Column {
         Text(
-            text     = s.launchesLabel,
-            style    = SoraType.Label,
+            text = s.launchesLabel,
+            style = SoraType.Label,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(Modifier.height(10.dp))
@@ -755,8 +759,8 @@ private fun LaunchesSectionError(onRetry: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text     = s.errorNetworkMessage,
-                style    = SoraType.Caption,
+                text = s.errorNetworkMessage,
+                style = SoraType.Caption,
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(12.dp))
@@ -782,8 +786,8 @@ private fun LaunchesSectionSkeleton(modifier: Modifier = Modifier) {
         Spacer(Modifier.height(10.dp))
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding        = PaddingValues(horizontal = 16.dp),
-            userScrollEnabled     = false
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            userScrollEnabled = false
         ) {
             items(4) {
                 Box(
@@ -1002,7 +1006,7 @@ private fun ArticleDetailSheet(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment     = Alignment.Top
+                    verticalAlignment = Alignment.Top
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         // Source
@@ -1019,17 +1023,17 @@ private fun ArticleDetailSheet(
                         )
                     }
                     FilledIconButton(
-                        onClick  = onToggleFavorite,
+                        onClick = onToggleFavorite,
                         modifier = Modifier.size(36.dp),
-                        colors   = IconButtonDefaults.filledIconButtonColors(
+                        colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = if (isFavorited) SoraColors.AccentSubtle else SoraColors.SurfaceHigh,
-                            contentColor   = if (isFavorited) SoraColors.Accent else SoraColors.TextSecondary
+                            contentColor = if (isFavorited) SoraColors.Accent else SoraColors.TextSecondary
                         )
                     ) {
                         Icon(
-                            imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                             contentDescription = "Favorite",
-                            modifier           = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -1136,19 +1140,19 @@ private fun LaunchDetailSheet(
     val spaceGrotesk = SoraFonts.SpaceGrotesk
 
     val statusColor = when (launch.statusAbbrev) {
-        "Go"      -> Color(0xFF4CAF50)
-        "TBD"     -> Color(0xFFFFB300)
-        "Hold"    -> Color(0xFFFF6D00)
+        "Go" -> Color(0xFF4CAF50)
+        "TBD" -> Color(0xFFFFB300)
+        "Hold" -> Color(0xFFFF6D00)
         "Success" -> SoraColors.Accent
-        else      -> SoraColors.TextSecondary
+        else -> SoraColors.TextSecondary
     }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState       = sheetState,
-        containerColor   = SoraColors.Surface,
-        contentColor     = SoraColors.TextPrimary,
-        tonalElevation   = 0.dp,
+        sheetState = sheetState,
+        containerColor = SoraColors.Surface,
+        contentColor = SoraColors.TextPrimary,
+        tonalElevation = 0.dp,
     ) {
         Column(
             modifier = Modifier
@@ -1166,10 +1170,10 @@ private fun LaunchDetailSheet(
             ) {
                 if (launch.imageUrl != null) {
                     AsyncImage(
-                        model              = launch.imageUrl,
+                        model = launch.imageUrl,
                         contentDescription = null,
-                        contentScale       = ContentScale.Crop,
-                        modifier           = Modifier.fillMaxSize()
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
                 } else {
                     Box(Modifier.fillMaxSize().background(SoraColors.SurfaceHigh))
@@ -1195,7 +1199,7 @@ private fun LaunchDetailSheet(
                         .padding(horizontal = 10.dp, vertical = 5.dp)
                 ) {
                     Text(
-                        text  = launch.statusName,
+                        text = launch.statusName,
                         style = SoraType.Label.copy(color = statusColor, fontSize = 10.sp)
                     )
                 }
@@ -1207,7 +1211,7 @@ private fun LaunchDetailSheet(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment     = Alignment.Top
+                    verticalAlignment = Alignment.Top
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         if (launch.provider.isNotEmpty()) {
@@ -1215,22 +1219,22 @@ private fun LaunchDetailSheet(
                             Spacer(Modifier.height(8.dp))
                         }
                         Text(
-                            text  = launch.name,
+                            text = launch.name,
                             style = SoraType.Title.copy(fontSize = 20.sp, lineHeight = 27.sp)
                         )
                     }
                     FilledIconButton(
-                        onClick  = onToggleFavorite,
+                        onClick = onToggleFavorite,
                         modifier = Modifier.size(36.dp),
-                        colors   = IconButtonDefaults.filledIconButtonColors(
+                        colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = if (isFavorited) SoraColors.AccentSubtle else SoraColors.SurfaceHigh,
-                            contentColor   = if (isFavorited) SoraColors.Accent else SoraColors.TextSecondary
+                            contentColor = if (isFavorited) SoraColors.Accent else SoraColors.TextSecondary
                         )
                     ) {
                         Icon(
-                            imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                             contentDescription = "Favorite",
-                            modifier           = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -1246,24 +1250,24 @@ private fun LaunchDetailSheet(
                 Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                     Column {
                         Text(
-                            text  = s.launchNetLabel.uppercase(),
+                            text = s.launchNetLabel.uppercase(),
                             style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
                         )
                         Spacer(Modifier.height(3.dp))
                         Text(
-                            text  = formatSheetDate(launch.net, s.monthNames),
+                            text = formatSheetDate(launch.net, s.monthNames),
                             style = SoraType.Caption
                         )
                     }
                     if (!launch.windowStart.isNullOrEmpty()) {
                         Column {
                             Text(
-                                text  = s.launchWindowLabel.uppercase(),
+                                text = s.launchWindowLabel.uppercase(),
                                 style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
                             )
                             Spacer(Modifier.height(3.dp))
                             Text(
-                                text  = formatSheetDate(launch.windowStart, s.monthNames),
+                                text = formatSheetDate(launch.windowStart, s.monthNames),
                                 style = SoraType.Caption
                             )
                         }
@@ -1277,8 +1281,11 @@ private fun LaunchDetailSheet(
                         if (launch.padName.isNotEmpty()) {
                             Column {
                                 Text(
-                                    text  = s.launchPadLabel.uppercase(),
-                                    style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                                    text = s.launchPadLabel.uppercase(),
+                                    style = SoraType.Label.copy(
+                                        fontSize = 8.sp,
+                                        letterSpacing = 1.5.sp
+                                    )
                                 )
                                 Spacer(Modifier.height(3.dp))
                                 Text(text = launch.padName, style = SoraType.Caption)
@@ -1287,8 +1294,11 @@ private fun LaunchDetailSheet(
                         if (launch.location.isNotEmpty()) {
                             Column {
                                 Text(
-                                    text  = s.launchLocationLabel.uppercase(),
-                                    style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                                    text = s.launchLocationLabel.uppercase(),
+                                    style = SoraType.Label.copy(
+                                        fontSize = 8.sp,
+                                        letterSpacing = 1.5.sp
+                                    )
                                 )
                                 Spacer(Modifier.height(3.dp))
                                 Text(text = launch.location, style = SoraType.Caption)
@@ -1304,8 +1314,11 @@ private fun LaunchDetailSheet(
                         if (launch.missionType.isNotEmpty()) {
                             Column {
                                 Text(
-                                    text  = s.launchMissionLabel.uppercase(),
-                                    style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                                    text = s.launchMissionLabel.uppercase(),
+                                    style = SoraType.Label.copy(
+                                        fontSize = 8.sp,
+                                        letterSpacing = 1.5.sp
+                                    )
                                 )
                                 Spacer(Modifier.height(3.dp))
                                 Text(text = launch.missionType, style = SoraType.Caption)
@@ -1314,8 +1327,11 @@ private fun LaunchDetailSheet(
                         if (launch.orbit.isNotEmpty()) {
                             Column {
                                 Text(
-                                    text  = s.launchOrbitLabel.uppercase(),
-                                    style = SoraType.Label.copy(fontSize = 8.sp, letterSpacing = 1.5.sp)
+                                    text = s.launchOrbitLabel.uppercase(),
+                                    style = SoraType.Label.copy(
+                                        fontSize = 8.sp,
+                                        letterSpacing = 1.5.sp
+                                    )
                                 )
                                 Spacer(Modifier.height(3.dp))
                                 Text(text = launch.orbit, style = SoraType.Caption)
@@ -1323,41 +1339,41 @@ private fun LaunchDetailSheet(
                         }
                     }
                 }
-/*
-                if (launch.url.isNotEmpty()) {
-                    Spacer(Modifier.height(28.dp))
-                    Button(
-                        onClick = {
-                            uriHandler.openUri(launch.url)
-                            onDismiss()
-                        },
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                        shape    = RoundedCornerShape(14.dp),
-                        colors   = ButtonDefaults.buttonColors(
-                            containerColor = SoraColors.Accent,
-                            contentColor   = Color.Black
-                        )
-                    ) {
-                        Text(
-                            text  = s.newsReadMore,
-                            style = SoraType.Caption.copy(
-                                fontFamily  = spaceGrotesk,
-                                fontWeight  = FontWeight.SemiBold,
-                                fontSize    = 15.sp,
-                                color       = Color.Black
-                            )
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Icon(
-                            imageVector        = Icons.AutoMirrored.Rounded.OpenInNew,
-                            contentDescription = null,
-                            modifier           = Modifier.size(16.dp),
-                            tint               = Color.Black
-                        )
-                    }
-                }
+                /*
+                                if (launch.url.isNotEmpty()) {
+                                    Spacer(Modifier.height(28.dp))
+                                    Button(
+                                        onClick = {
+                                            uriHandler.openUri(launch.url)
+                                            onDismiss()
+                                        },
+                                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                                        shape    = RoundedCornerShape(14.dp),
+                                        colors   = ButtonDefaults.buttonColors(
+                                            containerColor = SoraColors.Accent,
+                                            contentColor   = Color.Black
+                                        )
+                                    ) {
+                                        Text(
+                                            text  = s.newsReadMore,
+                                            style = SoraType.Caption.copy(
+                                                fontFamily  = spaceGrotesk,
+                                                fontWeight  = FontWeight.SemiBold,
+                                                fontSize    = 15.sp,
+                                                color       = Color.Black
+                                            )
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Icon(
+                                            imageVector        = Icons.AutoMirrored.Rounded.OpenInNew,
+                                            contentDescription = null,
+                                            modifier           = Modifier.size(16.dp),
+                                            tint               = Color.Black
+                                        )
+                                    }
+                                }
 
- */
+                 */
 
                 Spacer(Modifier.height(8.dp))
             }
@@ -1370,16 +1386,18 @@ private fun LaunchDetailSheet(
 @Suppress("DEPRECATION")
 private fun launchCountdown(netStr: String, strings: Strings): String {
     return try {
-        val net  = Instant.parse(netStr)
+        val net = Instant.parse(netStr)
         val diff = net - Clock.System.now()
         when {
-            diff.inWholeHours  <  1 -> "< 1h"
-            diff.inWholeHours  < 24 -> "in ${diff.inWholeHours}h"
-            diff.inWholeDays   <  2 -> "Tomorrow"
-            diff.inWholeDays   <  7 -> "in ${diff.inWholeDays}d"
-            else                    -> formatSheetDate(netStr, strings.monthNames)
+            diff.inWholeHours < 1 -> "< 1h"
+            diff.inWholeHours < 24 -> "in ${diff.inWholeHours}h"
+            diff.inWholeDays < 2 -> "Tomorrow"
+            diff.inWholeDays < 7 -> "in ${diff.inWholeDays}d"
+            else -> formatSheetDate(netStr, strings.monthNames)
         }
-    } catch (_: Exception) { "TBD" }
+    } catch (_: Exception) {
+        "TBD"
+    }
 }
 
 @Suppress("DEPRECATION")
@@ -1388,7 +1406,9 @@ private fun formatSheetDate(isoString: String, monthNames: List<String>): String
         val local = Instant.parse(isoString).toLocalDateTime(TimeZone.currentSystemDefault())
         val month = monthNames.getOrElse(local.monthNumber - 1) { "" }.take(3)
         "$month ${local.dayOfMonth}, ${local.year}"
-    } catch (_: Exception) { isoString }
+    } catch (_: Exception) {
+        isoString
+    }
 }
 
 @Suppress("DEPRECATION")
@@ -1404,10 +1424,12 @@ private fun timeAgo(publishedAt: String, strings: Strings): String {
         val published = Instant.parse(publishedAt)
         val diff = Clock.System.now() - published
         when {
-            diff.inWholeMinutes < 1  -> strings.newsJustNow
+            diff.inWholeMinutes < 1 -> strings.newsJustNow
             diff.inWholeMinutes < 60 -> strings.newsMinutesAgo(diff.inWholeMinutes.toInt())
-            diff.inWholeHours < 24   -> strings.newsHoursAgo(diff.inWholeHours.toInt())
-            else                     -> strings.newsDaysAgo(diff.inWholeDays.toInt())
+            diff.inWholeHours < 24 -> strings.newsHoursAgo(diff.inWholeHours.toInt())
+            else -> strings.newsDaysAgo(diff.inWholeDays.toInt())
         }
-    } catch (_: Exception) { "" }
+    } catch (_: Exception) {
+        ""
+    }
 }

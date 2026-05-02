@@ -29,5 +29,5 @@ private fun LaunchDto.toDomain() = SpaceLaunch(
     orbit              = mission?.orbit?.name.orEmpty(),
     padName            = pad?.name.orEmpty(),
     location           = pad?.location?.name.orEmpty(),
-    imageUrl           = image?.imageUrl
+    imageUrl           = image?.imageUrl?.replace("http://", "https://")
 )
