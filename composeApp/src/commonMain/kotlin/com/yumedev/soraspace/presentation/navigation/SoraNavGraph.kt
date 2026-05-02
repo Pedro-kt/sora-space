@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.yumedev.soraspace.data.local.DatabaseProvider
 import com.yumedev.soraspace.data.repository.ApodRepositoryImpl
 import com.yumedev.soraspace.data.repository.MediaRepositoryImpl
 import com.yumedev.soraspace.domain.model.NasaMedia
@@ -99,7 +100,9 @@ fun SoraNavGraph() {
         }
 
         composable<ApodRoute> {
-            val vm = viewModel { ApodViewModel(ApodRepositoryImpl()) }
+            val vm = viewModel {
+                ApodViewModel(ApodRepositoryImpl(), DatabaseProvider.favoritesRepository)
+            }
             ApodScreen(viewModel = vm, onBack = { navController.popBackStack() })
         }
 
@@ -115,7 +118,7 @@ fun SoraNavGraph() {
                 center       = route.center
             )
             val vm = viewModel {
-                MediaDetailViewModel(MediaRepositoryImpl(), route.nasaId, media.isVideo)
+                MediaDetailViewModel(MediaRepositoryImpl(), route.nasaId, media.isVideo, DatabaseProvider.favoritesRepository)
             }
             MediaDetailScreen(
                 media     = media,

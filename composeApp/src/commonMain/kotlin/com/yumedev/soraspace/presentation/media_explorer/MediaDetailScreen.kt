@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -48,7 +50,8 @@ fun MediaDetailScreen(
     viewModel: MediaDetailViewModel,
     onBack: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState     by viewModel.uiState.collectAsState()
+    val isFavorited by viewModel.isFavorited.collectAsState()
     val uriHandler = LocalUriHandler.current
 
     //val imageUrl = when (val s = uiState) {
@@ -98,6 +101,26 @@ fun MediaDetailScreen(
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
+                    modifier           = Modifier.size(18.dp)
+                )
+            }
+
+            // Botón favorito
+            FilledIconButton(
+                onClick  = { viewModel.toggleFavorite(media) },
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(16.dp)
+                    .size(36.dp)
+                    .align(Alignment.TopEnd),
+                colors   = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = Color.Black.copy(alpha = 0.55f),
+                    contentColor   = if (isFavorited) SoraColors.Accent else SoraColors.TextPrimary
+                )
+            ) {
+                Icon(
+                    imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = "Favorite",
                     modifier           = Modifier.size(18.dp)
                 )
             }

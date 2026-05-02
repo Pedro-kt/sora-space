@@ -1,0 +1,24 @@
+CREATE TABLE article_favorite (
+    id           INTEGER NOT NULL PRIMARY KEY,
+    title        TEXT NOT NULL,
+    url          TEXT NOT NULL,
+    image_url    TEXT NOT NULL,
+    news_site    TEXT NOT NULL,
+    summary      TEXT NOT NULL,
+    published_at TEXT NOT NULL,
+    updated_at   TEXT NOT NULL,
+    authors      TEXT NOT NULL
+);
+
+insertOrReplace:
+INSERT OR REPLACE INTO article_favorite(id, title, url, image_url, news_site, summary, published_at, updated_at, authors)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+delete:
+DELETE FROM article_favorite WHERE id = ?;
+
+selectAll:
+SELECT * FROM article_favorite ORDER BY published_at DESC;
+
+selectById:
+SELECT * FROM article_favorite WHERE id = ?;

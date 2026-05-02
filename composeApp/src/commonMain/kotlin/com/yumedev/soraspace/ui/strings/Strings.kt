@@ -84,6 +84,9 @@ sealed class Strings {
     abstract val screenFavorites: String
     abstract val favoritesEmptyTitle: String
     abstract val favoritesEmptySubtitle: String
+    abstract val favoritesTabAll: String
+    abstract val favoritesTabLaunches: String
+    abstract val favoritesTabNews: String
 
     // ─── Media Explorer ───────────────────────────────────────────────────────
     abstract val screenMediaExplorer: String
@@ -179,7 +182,10 @@ sealed class Strings {
 
         override val screenFavorites        = "FAVORITES"
         override val favoritesEmptyTitle    = "No favorites yet"
-        override val favoritesEmptySubtitle = "Save images from APOD to find them here"
+        override val favoritesEmptySubtitle = "Save your favorite items to find them here"
+        override val favoritesTabAll        = "All"
+        override val favoritesTabLaunches   = "Launches"
+        override val favoritesTabNews       = "News"
 
         override fun eonetCategoryName(id: String) = when (id) {
             "wildfires"     -> "Wildfires"
@@ -291,7 +297,10 @@ sealed class Strings {
 
         override val screenFavorites        = "FAVORITOS"
         override val favoritesEmptyTitle    = "Sin favoritos aún"
-        override val favoritesEmptySubtitle = "Guarda imágenes del APOD para verlas aquí"
+        override val favoritesEmptySubtitle = "Guarda tus elementos favoritos para verlos aquí"
+        override val favoritesTabAll        = "Todo"
+        override val favoritesTabLaunches   = "Lanzamientos"
+        override val favoritesTabNews       = "Noticias"
 
         override fun eonetCategoryName(id: String) = when (id) {
             "wildfires"     -> "Incendios"

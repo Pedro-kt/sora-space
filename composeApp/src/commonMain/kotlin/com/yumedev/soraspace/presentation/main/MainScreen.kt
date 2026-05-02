@@ -29,6 +29,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.yumedev.soraspace.data.local.DatabaseProvider
 import com.yumedev.soraspace.data.repository.AsteroidRepositoryImpl
 import com.yumedev.soraspace.data.repository.EonetRepositoryImpl
 import com.yumedev.soraspace.data.repository.MediaRepositoryImpl
@@ -37,6 +38,7 @@ import com.yumedev.soraspace.data.repository.SpaceNewsRepositoryImpl
 import com.yumedev.soraspace.data.repository.SpaceWeatherRepositoryImpl
 import com.yumedev.soraspace.domain.model.NasaMedia
 import com.yumedev.soraspace.presentation.favorites.FavoritesScreen
+import com.yumedev.soraspace.presentation.favorites.FavoritesViewModel
 import com.yumedev.soraspace.presentation.home.HomeScreen
 import com.yumedev.soraspace.presentation.home.HomeViewModel
 import com.yumedev.soraspace.presentation.media_explorer.MediaExplorerViewModel
@@ -139,7 +141,14 @@ fun MainScreen(
             exitTransition   = { fadeOut(animationSpec = tween(150)) }
         ) {
             composable<HomeRoute> {
-                val vm = viewModel { HomeViewModel(SpaceWeatherRepositoryImpl(), SpaceNewsRepositoryImpl(), LaunchRepositoryImpl()) }
+                val vm = viewModel {
+                    HomeViewModel(
+                        SpaceWeatherRepositoryImpl(),
+                        SpaceNewsRepositoryImpl(),
+                        LaunchRepositoryImpl(),
+                        DatabaseProvider.favoritesRepository
+                    )
+                }
                 HomeScreen(
                     viewModel             = vm,
                     onNavigateToApod      = onNavigateToApod,
@@ -168,7 +177,9 @@ fun MainScreen(
             }
 
             composable<MarsRoute> {
-                val vm = viewModel { MediaExplorerViewModel(MediaRepositoryImpl()) }
+                val vm = viewModel {
+                    MediaExplorerViewModel(MediaRepositoryImpl(), DatabaseProvider.favoritesRepository)
+                }
                 MarsScreen(
                     viewModel          = vm,
                     onBack             = { innerNav.popBackStack() },
@@ -182,7 +193,8 @@ fun MainScreen(
             }
 
             composable<FavoritesRoute> {
-                FavoritesScreen(onBack = { innerNav.popBackStack() })
+                val vm = viewModel { FavoritesViewModel(DatabaseProvider.favoritesRepository) }
+                FavoritesScreen(viewModel = vm, onBack = { innerNav.popBackStack() })
             }
 
             composable<SettingsRoute> {

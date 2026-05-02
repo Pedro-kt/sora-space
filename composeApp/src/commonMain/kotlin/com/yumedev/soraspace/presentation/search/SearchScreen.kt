@@ -7,6 +7,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,7 +30,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
@@ -126,35 +130,27 @@ private fun TabSelector(
     onTabSelected: (SearchTab) -> Unit,
     strings: Strings
 ) {
-    Row(
-        modifier              = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+    LazyRow(
+        contentPadding        = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        SearchTab.entries.forEach { tab ->
-            val isSelected = tab == selectedTab
+        items(SearchTab.entries) { tab ->
             val label = when (tab) {
                 SearchTab.ASTEROIDS    -> strings.tabAsteroids
                 SearchTab.EARTH_EVENTS -> strings.tabEarthEvents
             }
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = if (isSelected) SoraColors.Accent else SoraColors.Surface,
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .clickable { onTabSelected(tab) }
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
-            ) {
-                Text(
-                    text  = label,
-                    style = SoraType.Label.copy(
-                        color    = if (isSelected) SoraColors.Background else SoraColors.TextSecondary,
-                        fontSize = 10.sp
-                    )
-                )
-            }
+            ElevatedFilterChip(
+                selected = tab == selectedTab,
+                onClick  = { onTabSelected(tab) },
+                label    = { Text(label, style = SoraType.Caption) },
+                colors   = FilterChipDefaults.elevatedFilterChipColors(
+                    selectedContainerColor = SoraColors.AccentSubtle,
+                    selectedLabelColor     = SoraColors.Accent,
+                    containerColor         = SoraColors.Surface,
+                    labelColor             = SoraColors.TextSecondary
+                ),
+                elevation = FilterChipDefaults.filterChipElevation()
+            )
         }
     }
 }

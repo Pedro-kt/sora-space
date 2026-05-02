@@ -28,12 +28,15 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -65,8 +68,9 @@ fun MarsScreen(
     onBack: () -> Unit,
     onNavigateToDetail: (NasaMedia) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val query   by viewModel.query.collectAsState()
+    val uiState          by viewModel.uiState.collectAsState()
+    val query            by viewModel.query.collectAsState()
+    val favoriteMediaIds by viewModel.favoriteMediaIds.collectAsState()
     val keyboard = LocalSoftwareKeyboardController.current
     val s        = LocalStrings.current
 
@@ -137,7 +141,12 @@ fun MarsScreen(
             is MediaExplorerUiState.Idle    -> IdleContent(s.explorerIdleHint)
             is MediaExplorerUiState.Loading -> LoadingContent()
             is MediaExplorerUiState.Error   -> ErrorContent(state.message, s.retry) { viewModel.search() }
-            is MediaExplorerUiState.Success -> MediaGrid(state.items, onNavigateToDetail)
+            is MediaExplorerUiState.Success -> MediaGrid(
+                items            = state.items,
+                favoriteIds      = favoriteMediaIds,
+                onItemClick      = onNavigateToDetail,
+                onToggleFavorite = viewModel::toggleMediaFavorite
+            )
         }
     }
 }
@@ -145,7 +154,12 @@ fun MarsScreen(
 // ─── Componentes ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun MediaGrid(items: List<NasaMedia>, onItemClick: (NasaMedia) -> Unit) {
+private fun MediaGrid(
+    items: List<NasaMedia>,
+    favoriteIds: Set<String>,
+    onItemClick: (NasaMedia) -> Unit,
+    onToggleFavorite: (NasaMedia) -> Unit
+) {
     LazyVerticalGrid(
         columns               = GridCells.Fixed(2),
         contentPadding        = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
@@ -154,13 +168,23 @@ private fun MediaGrid(items: List<NasaMedia>, onItemClick: (NasaMedia) -> Unit) 
         modifier              = Modifier.fillMaxSize()
     ) {
         items(items, key = { it.id }) { media ->
-            MediaCard(media, onClick = { onItemClick(media) })
+            MediaCard(
+                media            = media,
+                isFavorited      = media.id in favoriteIds,
+                onClick          = { onItemClick(media) },
+                onToggleFavorite = { onToggleFavorite(media) }
+            )
         }
     }
 }
 
 @Composable
-private fun MediaCard(media: NasaMedia, onClick: () -> Unit) {
+private fun MediaCard(
+    media: NasaMedia,
+    isFavorited: Boolean,
+    onClick: () -> Unit,
+    onToggleFavorite: () -> Unit
+) {
     Box(
         modifier = Modifier
             .aspectRatio(1f)
@@ -199,8 +223,8 @@ private fun MediaCard(media: NasaMedia, onClick: () -> Unit) {
 
         if (media.isVideo) {
             Box(
-                modifier         = Modifier
-                    .align(Alignment.TopEnd)
+                modifier = Modifier
+                    .align(Alignment.TopStart)
                     .padding(6.dp)
                     .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(4.dp))
                     .padding(4.dp)
@@ -212,6 +236,18 @@ private fun MediaCard(media: NasaMedia, onClick: () -> Unit) {
                     modifier           = Modifier.size(14.dp)
                 )
             }
+        }
+
+        IconButton(
+            onClick  = onToggleFavorite,
+            modifier = Modifier.align(Alignment.TopEnd).size(32.dp)
+        ) {
+            Icon(
+                imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                contentDescription = "Favorite",
+                tint               = if (isFavorited) SoraColors.Accent else SoraColors.TextPrimary,
+                modifier           = Modifier.size(16.dp)
+            )
         }
     }
 }

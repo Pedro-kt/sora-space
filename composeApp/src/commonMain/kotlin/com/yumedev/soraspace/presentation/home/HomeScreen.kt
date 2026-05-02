@@ -40,14 +40,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -101,7 +106,9 @@ fun HomeScreen(
 ) {
     val s = LocalStrings.current
     val today = remember(s) { formattedToday(s.monthNames) }
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState              by viewModel.uiState.collectAsState()
+    val favoriteArticleIds   by viewModel.favoriteArticleIds.collectAsState()
+    val favoriteLaunchIds    by viewModel.favoriteLaunchIds.collectAsState()
     var selectedArticle by remember { mutableStateOf<SpaceArticle?>(null) }
     var selectedLaunch  by remember { mutableStateOf<SpaceLaunch?>(null) }
 
@@ -149,9 +156,11 @@ fun HomeScreen(
         val featured = uiState.featuredArticle
         if (featured != null) {
             FeaturedStoryCard(
-                article = featured,
-                modifier = Modifier.padding(horizontal = 16.dp),
-                onArticleClick = { selectedArticle = it }
+                article          = featured,
+                isFavorited      = featured.id in favoriteArticleIds,
+                onToggleFavorite = { viewModel.toggleArticleFavorite(featured) },
+                modifier         = Modifier.padding(horizontal = 16.dp),
+                onArticleClick   = { selectedArticle = it }
             )
         }
 
@@ -172,8 +181,10 @@ fun HomeScreen(
                 LatestNewsStripError(onRetry = { viewModel.loadNews() })
             } else if (uiState.latestNews.isNotEmpty()) {
                 LatestNewsStrip(
-                    articles = uiState.latestNews,
-                    onArticleClick = { selectedArticle = it }
+                    articles         = uiState.latestNews,
+                    favoriteIds      = favoriteArticleIds,
+                    onArticleClick   = { selectedArticle = it },
+                    onToggleFavorite = viewModel::toggleArticleFavorite
                 )
             }
         }
@@ -195,8 +206,10 @@ fun HomeScreen(
                 LaunchesSectionError(onRetry = { viewModel.loadLaunches() })
             } else if (uiState.launches.isNotEmpty()) {
                 LaunchesSection(
-                    launches      = uiState.launches,
-                    onLaunchClick = { selectedLaunch = it }
+                    launches         = uiState.launches,
+                    favoriteIds      = favoriteLaunchIds,
+                    onLaunchClick    = { selectedLaunch = it },
+                    onToggleFavorite = viewModel::toggleLaunchFavorite
                 )
             }
         }
@@ -246,15 +259,19 @@ fun HomeScreen(
 
     selectedArticle?.let { article ->
         ArticleDetailSheet(
-            article = article,
-            onDismiss = { selectedArticle = null }
+            article          = article,
+            isFavorited      = article.id in favoriteArticleIds,
+            onToggleFavorite = { viewModel.toggleArticleFavorite(article) },
+            onDismiss        = { selectedArticle = null }
         )
     }
 
     selectedLaunch?.let { launch ->
         LaunchDetailSheet(
-            launch    = launch,
-            onDismiss = { selectedLaunch = null }
+            launch           = launch,
+            isFavorited      = launch.id in favoriteLaunchIds,
+            onToggleFavorite = { viewModel.toggleLaunchFavorite(launch) },
+            onDismiss        = { selectedLaunch = null }
         )
     }
 }
@@ -391,6 +408,8 @@ private fun NavigationTile(
 @Composable
 private fun FeaturedStoryCard(
     article: SpaceArticle,
+    isFavorited: Boolean,
+    onToggleFavorite: () -> Unit,
     onArticleClick: (SpaceArticle) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -444,6 +463,17 @@ private fun FeaturedStoryCard(
                     style = SoraType.Caption
                 )
             }
+            IconButton(
+                onClick  = onToggleFavorite,
+                modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
+            ) {
+                Icon(
+                    imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    tint               = if (isFavorited) SoraColors.Accent else Color.White.copy(alpha = 0.8f),
+                    modifier           = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
@@ -453,7 +483,9 @@ private fun FeaturedStoryCard(
 @Composable
 private fun LatestNewsStrip(
     articles: List<SpaceArticle>,
+    favoriteIds: Set<Int>,
     onArticleClick: (SpaceArticle) -> Unit,
+    onToggleFavorite: (SpaceArticle) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val s = LocalStrings.current
@@ -469,7 +501,12 @@ private fun LatestNewsStrip(
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             items(articles) { article ->
-                NewsCard(article = article, onArticleClick = onArticleClick)
+                NewsCard(
+                    article          = article,
+                    isFavorited      = article.id in favoriteIds,
+                    onToggleFavorite = { onToggleFavorite(article) },
+                    onArticleClick   = onArticleClick
+                )
             }
         }
     }
@@ -478,6 +515,8 @@ private fun LatestNewsStrip(
 @Composable
 private fun NewsCard(
     article: SpaceArticle,
+    isFavorited: Boolean,
+    onToggleFavorite: () -> Unit,
     onArticleClick: (SpaceArticle) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -535,6 +574,17 @@ private fun NewsCard(
                     style = SoraType.Caption.copy(fontSize = 10.sp)
                 )
             }
+            IconButton(
+                onClick  = onToggleFavorite,
+                modifier = Modifier.align(Alignment.TopEnd).size(32.dp)
+            ) {
+                Icon(
+                    imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    tint               = if (isFavorited) SoraColors.Accent else Color.White.copy(alpha = 0.7f),
+                    modifier           = Modifier.size(14.dp)
+                )
+            }
         }
     }
 }
@@ -544,7 +594,9 @@ private fun NewsCard(
 @Composable
 private fun LaunchesSection(
     launches: List<SpaceLaunch>,
+    favoriteIds: Set<String>,
     onLaunchClick: (SpaceLaunch) -> Unit,
+    onToggleFavorite: (SpaceLaunch) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val s = LocalStrings.current
@@ -560,7 +612,12 @@ private fun LaunchesSection(
             contentPadding        = PaddingValues(horizontal = 16.dp)
         ) {
             items(launches, key = { it.id }) { launch ->
-                LaunchCard(launch = launch, onClick = { onLaunchClick(launch) })
+                LaunchCard(
+                    launch           = launch,
+                    isFavorited      = launch.id in favoriteIds,
+                    onToggleFavorite = { onToggleFavorite(launch) },
+                    onClick          = { onLaunchClick(launch) }
+                )
             }
         }
     }
@@ -569,6 +626,8 @@ private fun LaunchesSection(
 @Composable
 private fun LaunchCard(
     launch: SpaceLaunch,
+    isFavorited: Boolean,
+    onToggleFavorite: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -611,19 +670,36 @@ private fun LaunchCard(
                 )
             )
 
-            // Status badge — top right
-            Box(
+            // Status badge + favorite — top
+            Row(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(statusColor.copy(alpha = 0.18f))
-                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                    .padding(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment     = Alignment.CenterVertically
             ) {
-                Text(
-                    text  = launch.statusAbbrev,
-                    style = SoraType.Label.copy(color = statusColor, fontSize = 9.sp)
-                )
+                IconButton(
+                    onClick  = onToggleFavorite,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = "Favorite",
+                        tint               = if (isFavorited) SoraColors.Accent else Color.White.copy(alpha = 0.7f),
+                        modifier           = Modifier.size(14.dp)
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(statusColor.copy(alpha = 0.18f))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text  = launch.statusAbbrev,
+                        style = SoraType.Label.copy(color = statusColor, fontSize = 9.sp)
+                    )
+                }
             }
 
             // Content — bottom
@@ -886,6 +962,8 @@ private fun LatestNewsStripSkeleton(modifier: Modifier = Modifier) {
 @Composable
 private fun ArticleDetailSheet(
     article: SpaceArticle,
+    isFavorited: Boolean,
+    onToggleFavorite: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val s = LocalStrings.current
@@ -921,18 +999,40 @@ private fun ArticleDetailSheet(
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Spacer(Modifier.height(20.dp))
 
-                // Source
-                Text(
-                    text = article.newsSite.uppercase(),
-                    style = SoraType.Label
-                )
-                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment     = Alignment.Top
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        // Source
+                        Text(
+                            text = article.newsSite.uppercase(),
+                            style = SoraType.Label
+                        )
+                        Spacer(Modifier.height(8.dp))
 
-                // Title
-                Text(
-                    text = article.title,
-                    style = SoraType.Title.copy(fontSize = 20.sp, lineHeight = 27.sp)
-                )
+                        // Title
+                        Text(
+                            text = article.title,
+                            style = SoraType.Title.copy(fontSize = 20.sp, lineHeight = 27.sp)
+                        )
+                    }
+                    FilledIconButton(
+                        onClick  = onToggleFavorite,
+                        modifier = Modifier.size(36.dp),
+                        colors   = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = if (isFavorited) SoraColors.AccentSubtle else SoraColors.SurfaceHigh,
+                            contentColor   = if (isFavorited) SoraColors.Accent else SoraColors.TextSecondary
+                        )
+                    ) {
+                        Icon(
+                            imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            contentDescription = "Favorite",
+                            modifier           = Modifier.size(18.dp)
+                        )
+                    }
+                }
 
                 // Authors
                 if (article.authors.isNotEmpty()) {
@@ -1026,6 +1126,8 @@ private fun ArticleDetailSheet(
 @Composable
 private fun LaunchDetailSheet(
     launch: SpaceLaunch,
+    isFavorited: Boolean,
+    onToggleFavorite: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val s = LocalStrings.current
@@ -1102,15 +1204,36 @@ private fun LaunchDetailSheet(
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Spacer(Modifier.height(20.dp))
 
-                if (launch.provider.isNotEmpty()) {
-                    Text(text = launch.provider.uppercase(), style = SoraType.Label)
-                    Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment     = Alignment.Top
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        if (launch.provider.isNotEmpty()) {
+                            Text(text = launch.provider.uppercase(), style = SoraType.Label)
+                            Spacer(Modifier.height(8.dp))
+                        }
+                        Text(
+                            text  = launch.name,
+                            style = SoraType.Title.copy(fontSize = 20.sp, lineHeight = 27.sp)
+                        )
+                    }
+                    FilledIconButton(
+                        onClick  = onToggleFavorite,
+                        modifier = Modifier.size(36.dp),
+                        colors   = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = if (isFavorited) SoraColors.AccentSubtle else SoraColors.SurfaceHigh,
+                            contentColor   = if (isFavorited) SoraColors.Accent else SoraColors.TextSecondary
+                        )
+                    ) {
+                        Icon(
+                            imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            contentDescription = "Favorite",
+                            modifier           = Modifier.size(18.dp)
+                        )
+                    }
                 }
-
-                Text(
-                    text  = launch.name,
-                    style = SoraType.Title.copy(fontSize = 20.sp, lineHeight = 27.sp)
-                )
 
                 if (launch.missionDescription.isNotEmpty()) {
                     Spacer(Modifier.height(16.dp))

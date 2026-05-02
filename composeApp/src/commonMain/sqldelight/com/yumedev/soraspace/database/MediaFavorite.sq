@@ -1,0 +1,22 @@
+CREATE TABLE media_favorite (
+    id            TEXT NOT NULL PRIMARY KEY,
+    title         TEXT NOT NULL,
+    description   TEXT,
+    thumbnail_url TEXT,
+    media_type    TEXT NOT NULL,
+    date_created  TEXT,
+    center        TEXT
+);
+
+insertOrReplace:
+INSERT OR REPLACE INTO media_favorite(id, title, description, thumbnail_url, media_type, date_created, center)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+delete:
+DELETE FROM media_favorite WHERE id = ?;
+
+selectAll:
+SELECT * FROM media_favorite ORDER BY date_created DESC;
+
+selectById:
+SELECT * FROM media_favorite WHERE id = ?;

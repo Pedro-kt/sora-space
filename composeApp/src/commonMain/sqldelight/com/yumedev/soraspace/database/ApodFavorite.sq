@@ -1,0 +1,22 @@
+CREATE TABLE apod_favorite (
+    date         TEXT NOT NULL PRIMARY KEY,
+    title        TEXT NOT NULL,
+    explanation  TEXT NOT NULL,
+    image_url    TEXT NOT NULL,
+    hd_image_url TEXT,
+    media_type   TEXT NOT NULL,
+    copyright    TEXT
+);
+
+insertOrReplace:
+INSERT OR REPLACE INTO apod_favorite(date, title, explanation, image_url, hd_image_url, media_type, copyright)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+delete:
+DELETE FROM apod_favorite WHERE date = ?;
+
+selectAll:
+SELECT * FROM apod_favorite ORDER BY date DESC;
+
+selectByDate:
+SELECT * FROM apod_favorite WHERE date = ?;
