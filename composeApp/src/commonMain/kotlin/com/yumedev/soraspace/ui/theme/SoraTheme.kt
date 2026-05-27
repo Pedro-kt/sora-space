@@ -15,6 +15,7 @@ import soraspace.composeapp.generated.resources.space_grotesk_regular
 import soraspace.composeapp.generated.resources.space_grotesk_semibold
 
 object SoraColors {
+    // Base colors
     val Background    = Color(0xFF000000)
     val Surface       = Color(0xFF0F0F0F)
     val SurfaceHigh   = Color(0xFF1A1A1A)
@@ -23,6 +24,48 @@ object SoraColors {
     val TextPrimary   = Color(0xFFFFFFFF)
     val TextSecondary = Color(0xFF888888)
     val TextTertiary  = Color(0xFF3A3A3A)
+
+    // Semantic colors
+    object Status {
+        val Success = Color(0xFF4CAF50)
+        val Warning = Color(0xFFFFB300)
+        val Error   = Color(0xFFF44336)
+        val Info    = Color(0xFF2196F3)
+    }
+
+    // Space Weather Activity Levels
+    object Activity {
+        val Quiet    = Status.Success      // Green
+        val Minor    = Color(0xFFCDDC39)   // Yellow-green
+        val Moderate = Color(0xFFFF9800)   // Orange
+        val Severe   = Status.Error        // Red
+    }
+
+    // EONET Event Categories
+    object Categories {
+        val Wildfires     = Color(0xFFFF6B35)
+        val Volcanoes     = Color(0xFFFF7043)
+        val SevereStorms  = Color(0xFF64B5F6)
+        val Drought       = Color(0xFFD4A373)
+        val Earthquakes   = Color(0xFF8B4513)
+        val Floods        = Color(0xFF4FC3F7)
+        val Landslides    = Color(0xFF6D4C41)
+        val ManMade       = Color(0xFF90A4AE)
+        val SeaLakeIce    = Color(0xFFB3E5FC)
+        val Snow          = Color(0xFFE1F5FE)
+        val TemperatureEx = Color(0xFFFF8A65)
+        val WaterColor    = Color(0xFF26C6DA)
+        val Dust          = Color(0xFFBCAAA4)
+    }
+
+    // Launch Status Colors
+    object LaunchStatus {
+        val Go      = Status.Success
+        val TBD     = Status.Warning
+        val Hold    = Color(0xFFFF6D00)  // Dark orange
+        val Success = Accent
+        val Failed  = Status.Error
+    }
 }
 
 object SoraFonts {

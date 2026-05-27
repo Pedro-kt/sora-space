@@ -117,7 +117,7 @@ fun MediaDetailScreen(
             // Botón back (siempre visible)
             FilledIconButton(
                 onClick  = onBack,
-                modifier = Modifier.statusBarsPadding().padding(16.dp).size(36.dp),
+                modifier = Modifier.statusBarsPadding().padding(16.dp).size(48.dp),
                 colors   = IconButtonDefaults.filledIconButtonColors(
                     containerColor = Color.Black.copy(alpha = 0.55f),
                     contentColor   = SoraColors.TextPrimary
@@ -136,7 +136,7 @@ fun MediaDetailScreen(
                 modifier = Modifier
                     .statusBarsPadding()
                     .padding(16.dp)
-                    .size(36.dp)
+                    .size(48.dp)
                     .align(Alignment.TopEnd),
                 colors   = IconButtonDefaults.filledIconButtonColors(
                     containerColor = Color.Black.copy(alpha = 0.55f),

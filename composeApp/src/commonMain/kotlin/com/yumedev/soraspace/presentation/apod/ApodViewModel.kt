@@ -26,6 +26,9 @@ class ApodViewModel(
         .map { list -> list.map { it.date }.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
+    private val _favoriteEvent = MutableStateFlow<FavoriteEvent?>(null)
+    val favoriteEvent: StateFlow<FavoriteEvent?> = _favoriteEvent.asStateFlow()
+
     init {
         loadHome()
     }
@@ -53,7 +56,25 @@ class ApodViewModel(
             val state = _uiState.value as? ApodUiState.Success ?: return@launch
             val apod = if (state.featured.date == date) state.featured
                        else state.feed.find { it.date == date } ?: return@launch
+
+            val wasAlreadyFavorited = favorites.value.contains(date)
             favoritesRepository.toggleApodFavorite(apod)
+
+            // Emit event for snackbar
+            _favoriteEvent.value = if (wasAlreadyFavorited) {
+                FavoriteEvent.Removed
+            } else {
+                FavoriteEvent.Added
+            }
         }
     }
+
+    fun clearFavoriteEvent() {
+        _favoriteEvent.value = null
+    }
+}
+
+sealed class FavoriteEvent {
+    data object Added : FavoriteEvent()
+    data object Removed : FavoriteEvent()
 }

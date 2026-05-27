@@ -80,7 +80,7 @@ fun SearchScreen(
         ) {
             FilledIconButton(
                 onClick  = onBack,
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(48.dp),
                 colors   = IconButtonDefaults.filledIconButtonColors(
                     containerColor = SoraColors.Surface,
                     contentColor   = SoraColors.TextPrimary
@@ -238,19 +238,19 @@ private fun AsteroidCard(asteroid: Asteroid) {
                     verticalAlignment     = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier              = Modifier
-                        .background(Color(0xFFFF4444).copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                        .background(SoraColors.Status.Error.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Icon(
                         Icons.Filled.Warning,
-                        contentDescription = null,
-                        tint     = Color(0xFFFF4444),
+                        contentDescription = "Potentially hazardous asteroid",
+                        tint     = SoraColors.Status.Error,
                         modifier = Modifier.size(11.dp)
                     )
                     Text(
                         text  = s.hazardous,
                         style = SoraType.Caption.copy(
-                            color      = Color(0xFFFF4444),
+                            color      = SoraColors.Status.Error,
                             fontWeight = FontWeight.Bold,
                             fontSize   = 10.sp
                         )
@@ -539,18 +539,18 @@ private fun LoadingContent() {
 // ─── Category colors ──────────────────────────────────────────────────────────
 
 private fun categoryColor(id: String): Color = when (id) {
-    "wildfires"     -> Color(0xFFFF6B35)
-    "severeStorms"  -> Color(0xFF64B5F6)
-    "volcanoes"     -> Color(0xFFFF7043)
-    "seaAndLakeIce" -> Color(0xFF80DEEA)
-    "floods"        -> Color(0xFF4DB6AC)
-    "earthquakes"   -> Color(0xFFFFD54F)
-    "drought"       -> Color(0xFFFFCC02)
-    "snow"          -> Color(0xFFE0E0E0)
-    "dustHaze"      -> Color(0xFFBCAAA4)
-    "landslides"    -> Color(0xFFA1887F)
-    "manmade"       -> Color(0xFFCE93D8)
-    "waterColor"    -> Color(0xFF26C6DA)
-    "tempExtremes"  -> Color(0xFFEF9A9A)
+    "wildfires"     -> SoraColors.Categories.Wildfires
+    "severeStorms"  -> SoraColors.Categories.SevereStorms
+    "volcanoes"     -> SoraColors.Categories.Volcanoes
+    "seaAndLakeIce" -> SoraColors.Categories.SeaLakeIce
+    "floods"        -> SoraColors.Categories.Floods
+    "earthquakes"   -> SoraColors.Categories.Earthquakes
+    "drought"       -> SoraColors.Categories.Drought
+    "snow"          -> SoraColors.Categories.Snow
+    "dustHaze"      -> SoraColors.Categories.Dust
+    "landslides"    -> SoraColors.Categories.Landslides
+    "manmade"       -> SoraColors.Categories.ManMade
+    "waterColor"    -> SoraColors.Categories.WaterColor
+    "tempExtremes"  -> SoraColors.Categories.TemperatureEx
     else            -> SoraColors.Accent
 }

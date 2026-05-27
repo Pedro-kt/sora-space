@@ -54,9 +54,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -79,6 +82,7 @@ import com.yumedev.soraspace.domain.model.ActivityLevel
 import com.yumedev.soraspace.domain.model.SpaceArticle
 import com.yumedev.soraspace.domain.model.SpaceLaunch
 import com.yumedev.soraspace.domain.model.SpaceWeather
+import com.yumedev.soraspace.ui.components.SoraSnackbarHost
 import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.strings.Strings
 import com.yumedev.soraspace.ui.theme.SoraColors
@@ -109,15 +113,44 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val favoriteArticleIds by viewModel.favoriteArticleIds.collectAsState()
     val favoriteLaunchIds by viewModel.favoriteLaunchIds.collectAsState()
+    val favoriteEvent by viewModel.favoriteEvent.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
     var selectedArticle by remember { mutableStateOf<SpaceArticle?>(null) }
     var selectedLaunch by remember { mutableStateOf<SpaceLaunch?>(null) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(SoraColors.Background)
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical))
-            .verticalScroll(rememberScrollState())
+    // Observe favorite events and show snackbar
+    LaunchedEffect(favoriteEvent) {
+        when (favoriteEvent) {
+            is HomeFavoriteEvent.AddedArticle -> {
+                snackbarHostState.showSnackbar("Added article to favorites")
+                viewModel.clearFavoriteEvent()
+            }
+            is HomeFavoriteEvent.RemovedArticle -> {
+                snackbarHostState.showSnackbar("Removed article from favorites")
+                viewModel.clearFavoriteEvent()
+            }
+            is HomeFavoriteEvent.AddedLaunch -> {
+                snackbarHostState.showSnackbar("Added launch to favorites")
+                viewModel.clearFavoriteEvent()
+            }
+            is HomeFavoriteEvent.RemovedLaunch -> {
+                snackbarHostState.showSnackbar("Removed launch from favorites")
+                viewModel.clearFavoriteEvent()
+            }
+            null -> { /* No event */ }
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SoraSnackbarHost(snackbarHostState) },
+        containerColor = SoraColors.Background
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical))
+                .verticalScroll(rememberScrollState())
             .padding(top = 36.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -255,24 +288,25 @@ fun HomeScreen(
             modifier = Modifier.height(130.dp).padding(horizontal = 16.dp),
             onClick = onNavigateToFavorites
         )
-    }
+        }
 
-    selectedArticle?.let { article ->
-        ArticleDetailSheet(
-            article = article,
-            isFavorited = article.id in favoriteArticleIds,
-            onToggleFavorite = { viewModel.toggleArticleFavorite(article) },
-            onDismiss = { selectedArticle = null }
-        )
-    }
+        selectedArticle?.let { article ->
+            ArticleDetailSheet(
+                article = article,
+                isFavorited = article.id in favoriteArticleIds,
+                onToggleFavorite = { viewModel.toggleArticleFavorite(article) },
+                onDismiss = { selectedArticle = null }
+            )
+        }
 
-    selectedLaunch?.let { launch ->
-        LaunchDetailSheet(
-            launch = launch,
-            isFavorited = launch.id in favoriteLaunchIds,
-            onToggleFavorite = { viewModel.toggleLaunchFavorite(launch) },
-            onDismiss = { selectedLaunch = null }
-        )
+        selectedLaunch?.let { launch ->
+            LaunchDetailSheet(
+                launch = launch,
+                isFavorited = launch.id in favoriteLaunchIds,
+                onToggleFavorite = { viewModel.toggleLaunchFavorite(launch) },
+                onDismiss = { selectedLaunch = null }
+            )
+        }
     }
 }
 
@@ -286,10 +320,10 @@ private fun SpaceWeatherCard(
     val s = LocalStrings.current
 
     val activityColor = when (weather.activityLevel) {
-        ActivityLevel.QUIET -> Color(0xFF4CAF50)
-        ActivityLevel.MINOR -> Color(0xFFCDDC39)
-        ActivityLevel.MODERATE -> Color(0xFFFF9800)
-        ActivityLevel.SEVERE -> Color(0xFFF44336)
+        ActivityLevel.QUIET -> SoraColors.Activity.Quiet
+        ActivityLevel.MINOR -> SoraColors.Activity.Minor
+        ActivityLevel.MODERATE -> SoraColors.Activity.Moderate
+        ActivityLevel.SEVERE -> SoraColors.Activity.Severe
     }
 
     val activityLabel = when (weather.activityLevel) {
@@ -363,7 +397,7 @@ private fun NavigationTile(
         Box(modifier = Modifier.fillMaxSize()) {
             Image(
                 painter = painterResource(backgroundImage),
-                contentDescription = null,
+                contentDescription = label,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
@@ -580,7 +614,7 @@ private fun NewsCard(
             }
             IconButton(
                 onClick = onToggleFavorite,
-                modifier = Modifier.align(Alignment.TopEnd).size(32.dp)
+                modifier = Modifier.align(Alignment.TopEnd).size(48.dp)
             ) {
                 Icon(
                     imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
@@ -637,10 +671,10 @@ private fun LaunchCard(
 ) {
     val s = LocalStrings.current
     val statusColor = when (launch.statusAbbrev) {
-        "Go" -> Color(0xFF4CAF50)
-        "TBD" -> Color(0xFFFFB300)
-        "Hold" -> Color(0xFFFF6D00)
-        "Success" -> SoraColors.Accent
+        "Go" -> SoraColors.LaunchStatus.Go
+        "TBD" -> SoraColors.LaunchStatus.TBD
+        "Hold" -> SoraColors.LaunchStatus.Hold
+        "Success" -> SoraColors.LaunchStatus.Success
         else -> SoraColors.TextSecondary
     }
 
@@ -1024,7 +1058,7 @@ private fun ArticleDetailSheet(
                     }
                     FilledIconButton(
                         onClick = onToggleFavorite,
-                        modifier = Modifier.size(36.dp),
+                        modifier = Modifier.size(48.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = if (isFavorited) SoraColors.AccentSubtle else SoraColors.SurfaceHigh,
                             contentColor = if (isFavorited) SoraColors.Accent else SoraColors.TextSecondary
@@ -1140,10 +1174,10 @@ private fun LaunchDetailSheet(
     val spaceGrotesk = SoraFonts.SpaceGrotesk
 
     val statusColor = when (launch.statusAbbrev) {
-        "Go" -> Color(0xFF4CAF50)
-        "TBD" -> Color(0xFFFFB300)
-        "Hold" -> Color(0xFFFF6D00)
-        "Success" -> SoraColors.Accent
+        "Go" -> SoraColors.LaunchStatus.Go
+        "TBD" -> SoraColors.LaunchStatus.TBD
+        "Hold" -> SoraColors.LaunchStatus.Hold
+        "Success" -> SoraColors.LaunchStatus.Success
         else -> SoraColors.TextSecondary
     }
 
@@ -1225,7 +1259,7 @@ private fun LaunchDetailSheet(
                     }
                     FilledIconButton(
                         onClick = onToggleFavorite,
-                        modifier = Modifier.size(36.dp),
+                        modifier = Modifier.size(48.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = if (isFavorited) SoraColors.AccentSubtle else SoraColors.SurfaceHigh,
                             contentColor = if (isFavorited) SoraColors.Accent else SoraColors.TextSecondary

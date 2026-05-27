@@ -70,7 +70,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         ) {
             FilledIconButton(
                 onClick  = onBack,
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(48.dp),
                 colors   = IconButtonDefaults.filledIconButtonColors(
                     containerColor = SoraColors.Surface,
                     contentColor   = SoraColors.TextPrimary

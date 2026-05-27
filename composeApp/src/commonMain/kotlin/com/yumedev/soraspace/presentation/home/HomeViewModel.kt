@@ -35,6 +35,9 @@ class HomeViewModel(
         .map { list -> list.map { it.id }.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
+    private val _favoriteEvent = MutableStateFlow<HomeFavoriteEvent?>(null)
+    val favoriteEvent: StateFlow<HomeFavoriteEvent?> = _favoriteEvent.asStateFlow()
+
     init {
         loadSpaceWeather()
         loadNews()
@@ -84,10 +87,41 @@ class HomeViewModel(
     }
 
     fun toggleArticleFavorite(article: SpaceArticle) {
-        viewModelScope.launch { favoritesRepository.toggleArticleFavorite(article) }
+        viewModelScope.launch {
+            val wasAlreadyFavorited = favoriteArticleIds.value.contains(article.id)
+            favoritesRepository.toggleArticleFavorite(article)
+
+            // Emit event for snackbar
+            _favoriteEvent.value = if (wasAlreadyFavorited) {
+                HomeFavoriteEvent.RemovedArticle
+            } else {
+                HomeFavoriteEvent.AddedArticle
+            }
+        }
     }
 
     fun toggleLaunchFavorite(launch: SpaceLaunch) {
-        viewModelScope.launch { favoritesRepository.toggleLaunchFavorite(launch) }
+        viewModelScope.launch {
+            val wasAlreadyFavorited = favoriteLaunchIds.value.contains(launch.id)
+            favoritesRepository.toggleLaunchFavorite(launch)
+
+            // Emit event for snackbar
+            _favoriteEvent.value = if (wasAlreadyFavorited) {
+                HomeFavoriteEvent.RemovedLaunch
+            } else {
+                HomeFavoriteEvent.AddedLaunch
+            }
+        }
     }
+
+    fun clearFavoriteEvent() {
+        _favoriteEvent.value = null
+    }
+}
+
+sealed class HomeFavoriteEvent {
+    data object AddedArticle : HomeFavoriteEvent()
+    data object RemovedArticle : HomeFavoriteEvent()
+    data object AddedLaunch : HomeFavoriteEvent()
+    data object RemovedLaunch : HomeFavoriteEvent()
 }

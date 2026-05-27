@@ -87,7 +87,7 @@ fun FavoritesScreen(viewModel: FavoritesViewModel, onBack: () -> Unit) {
         ) {
             FilledIconButton(
                 onClick  = onBack,
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(48.dp),
                 colors   = IconButtonDefaults.filledIconButtonColors(
                     containerColor = SoraColors.Surface,
                     contentColor   = SoraColors.TextPrimary
@@ -417,7 +417,7 @@ private fun MediaFavoriteCard(media: NasaMedia, onRemove: (NasaMedia) -> Unit) {
         }
         IconButton(
             onClick  = { onRemove(media) },
-            modifier = Modifier.align(Alignment.TopEnd).size(32.dp)
+            modifier = Modifier.align(Alignment.TopEnd).size(48.dp)
         ) {
             Icon(
                 imageVector        = Icons.Filled.Favorite,

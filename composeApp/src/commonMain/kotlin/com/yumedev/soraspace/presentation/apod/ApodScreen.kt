@@ -30,9 +30,13 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,38 +51,61 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.yumedev.soraspace.domain.model.Apod
 import com.yumedev.soraspace.ui.components.SoraErrorCard
+import com.yumedev.soraspace.ui.components.SoraSnackbarHost
 import com.yumedev.soraspace.ui.strings.LocalStrings
 import com.yumedev.soraspace.ui.theme.SoraColors
 import com.yumedev.soraspace.ui.theme.SoraType
 
 @Composable
 fun ApodScreen(viewModel: ApodViewModel, onBack: () -> Unit) {
-    val uiState   by viewModel.uiState.collectAsStateWithLifecycle()
-    val favorites by viewModel.favorites.collectAsStateWithLifecycle()
+    val uiState        by viewModel.uiState.collectAsStateWithLifecycle()
+    val favorites      by viewModel.favorites.collectAsStateWithLifecycle()
+    val favoriteEvent  by viewModel.favoriteEvent.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val s = LocalStrings.current
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(SoraColors.Background)
-    ) {
-        when (val state = uiState) {
-            is ApodUiState.Loading -> LoadingContent()
-            is ApodUiState.Success -> ApodContent(
-                featured         = state.featured,
-                feed             = state.feed,
-                favorites        = favorites,
-                onToggleFavorite = viewModel::toggleFavorite,
-                onBack           = onBack
-            )
-            is ApodUiState.Error -> {
-                val s = LocalStrings.current
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    SoraErrorCard(
-                        title    = s.apodErrorTitle,
-                        message  = s.errorNetworkMessage,
-                        onRetry  = viewModel::loadHome,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-                    )
+    // Observe favorite events and show snackbar
+    LaunchedEffect(favoriteEvent) {
+        when (favoriteEvent) {
+            is FavoriteEvent.Added -> {
+                snackbarHostState.showSnackbar("Added to favorites")
+                viewModel.clearFavoriteEvent()
+            }
+            is FavoriteEvent.Removed -> {
+                snackbarHostState.showSnackbar("Removed from favorites")
+                viewModel.clearFavoriteEvent()
+            }
+            null -> { /* No event */ }
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SoraSnackbarHost(snackbarHostState) },
+        containerColor = SoraColors.Background
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when (val state = uiState) {
+                is ApodUiState.Loading -> LoadingContent()
+                is ApodUiState.Success -> ApodContent(
+                    featured         = state.featured,
+                    feed             = state.feed,
+                    favorites        = favorites,
+                    onToggleFavorite = viewModel::toggleFavorite,
+                    onBack           = onBack
+                )
+                is ApodUiState.Error -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        SoraErrorCard(
+                            title    = s.apodErrorTitle,
+                            message  = s.errorNetworkMessage,
+                            onRetry  = viewModel::loadHome,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                        )
+                    }
                 }
             }
         }
@@ -134,7 +161,7 @@ private fun HeroSection(
             if (apod.mediaType == "image") {
                 AsyncImage(
                     model              = apod.imageUrl,
-                    contentDescription = null,
+                    contentDescription = "Astronomy Picture of the Day: ${apod.title}",
                     modifier           = Modifier.fillMaxSize(),
                     contentScale       = ContentScale.Crop
                 )
@@ -147,7 +174,7 @@ private fun HeroSection(
                 ) {
                     Icon(
                         imageVector        = Icons.Filled.PlayCircle,
-                        contentDescription = null,
+                        contentDescription = "Play video: ${apod.title}",
                         tint               = SoraColors.TextSecondary,
                         modifier           = Modifier.size(48.dp)
                     )
@@ -174,7 +201,7 @@ private fun HeroSection(
                     .align(Alignment.TopStart)
                     .statusBarsPadding()
                     .padding(12.dp)
-                    .size(36.dp),
+                    .size(48.dp),
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = Color.Black.copy(alpha = 0.5f),
                     contentColor   = SoraColors.TextPrimary
@@ -183,7 +210,7 @@ private fun HeroSection(
                 Icon(
                     imageVector        = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    modifier           = Modifier.size(18.dp)
+                    modifier           = Modifier.size(24.dp)
                 )
             }
 
@@ -266,7 +293,7 @@ private fun FeedItem(
         if (apod.mediaType == "image") {
             AsyncImage(
                 model              = apod.imageUrl,
-                contentDescription = null,
+                contentDescription = apod.title,
                 modifier           = Modifier.fillMaxSize(),
                 contentScale       = ContentScale.Crop
             )
@@ -343,7 +370,7 @@ private fun FavoriteButton(
 ) {
     FilledIconButton(
         onClick  = onClick,
-        modifier = modifier.size(36.dp),
+        modifier = modifier.size(48.dp),
         colors   = IconButtonDefaults.filledIconButtonColors(
             containerColor = Color.Black.copy(alpha = 0.5f),
             contentColor   = if (isFavorited) SoraColors.Accent else SoraColors.TextSecondary
@@ -351,8 +378,8 @@ private fun FavoriteButton(
     ) {
         Icon(
             imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-            contentDescription = null,
-            modifier           = Modifier.size(16.dp)
+            contentDescription = if (isFavorited) "Remove from favorites" else "Add to favorites",
+            modifier           = Modifier.size(24.dp)
         )
     }
 }

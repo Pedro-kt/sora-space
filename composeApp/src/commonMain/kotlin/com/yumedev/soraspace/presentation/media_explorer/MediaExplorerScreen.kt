@@ -90,7 +90,7 @@ fun MarsScreen(
         ) {
             FilledIconButton(
                 onClick  = onBack,
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(48.dp),
                 colors   = IconButtonDefaults.filledIconButtonColors(
                     containerColor = SoraColors.Surface,
                     contentColor   = SoraColors.TextPrimary
@@ -240,7 +240,7 @@ private fun MediaCard(
 
         IconButton(
             onClick  = onToggleFavorite,
-            modifier = Modifier.align(Alignment.TopEnd).size(32.dp)
+            modifier = Modifier.align(Alignment.TopEnd).size(48.dp)
         ) {
             Icon(
                 imageVector        = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
